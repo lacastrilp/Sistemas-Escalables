@@ -610,6 +610,16 @@ def generar_lineas(
     resto = cantidad_lineas % cantidad_ordenes
 
     linea_id = 1
+    cantidad_hot = max(
+        1,
+        math.ceil(cantidad_skus * 0.10)
+    )
+
+    cantidad_lineas_hot = round(
+        cantidad_lineas * 0.60
+    )
+
+    contador_lineas = 0
 
     try:
 
@@ -625,16 +635,18 @@ def generar_lineas(
                 numero_lineas + 1
             ):
 
-                cantidad_hot = max(
-                    1,
-                    math.ceil(cantidad_skus * 0.10)
-                )
+                if contador_lineas < cantidad_lineas_hot:
+                    sku_id = rng.randint(
+                        1,
+                        cantidad_hot
+                    )
+                else:
+                    sku_id = rng.randint(
+                        cantidad_hot + 1,
+                        cantidad_skus
+                    )
 
-                cantidad_lineas_hot = round(
-                    cantidad_lineas * 0.60
-                )
-
-                contador_lineas = 0
+                contador_lineas += 1
 
                 cantidad = rng.randint(
                     1,
