@@ -49,18 +49,28 @@ def fecha_aleatoria(rng, inicio, fin):
     return inicio + timedelta(days=rng.randint(0, dias))
 
 
+def hora_operativa(rng):
+    x = rng.random()
+
+    if x < 0.75:
+        return rng.randint(8, 10)
+
+    if x < 0.93:
+        return rng.randint(11, 17)
+
+    if x < 0.98:
+        return rng.randint(6, 7)
+
+    return rng.randint(0, 5)
+
+
 def fecha_hora_aleatoria(rng, inicio, fin):
     dias = (fin - inicio).days
 
     fecha = inicio + timedelta(days=rng.randint(0, dias))
 
-    # Horas con concentración entre 08:00 y 11:00.
-    if rng.random() < 0.70:
-        hora = rng.randint(8, 10)
-        minuto = rng.randint(0, 59)
-    else:
-        hora = rng.randint(0, 23)
-        minuto = rng.randint(0, 59)
+    hora = hora_operativa(rng)
+    minuto = rng.randint(0, 59)
 
     segundo = rng.randint(0, 59)
 
@@ -414,7 +424,7 @@ def generar_franjas(cantidad, cedis, rng):
 # ZIPF
 # ============================================================
 
-def crear_distribucion_zipf(cantidad, s=1.15):
+def crear_distribucion_zipf(cantidad, s=0.95):
 
     pesos = [
         1 / (i ** s)
@@ -867,7 +877,7 @@ def main():
     parser.add_argument(
         "--zipf-s",
         type=float,
-        default=1.15
+        default=0.95
     )
 
     args = parser.parse_args()
