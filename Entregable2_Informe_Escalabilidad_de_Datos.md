@@ -41,35 +41,47 @@ Para modelar la concentración real del retail donde unos pocos superproveedores
 - **Top 20 % de proveedores:** Concentra el **78.73 %** de las órdenes totales.
 - **Proveedor más "caliente" (`proveedor_id = 1`):** Acumula **18 486 órdenes** y **92 430 líneas de orden**.
 
-### B. Sesgo en Catálogo (Hot SKUs)
-- **Top 10 % de SKUs negociados (20 000 SKUs):** Aparecen en **1 122 917 de las 1 500 000 líneas de orden** (**74.86 %** de concentración, superando el objetivo de $\ge 60\%$).
+![Distribución Zipf de Órdenes por Proveedor](datos/output/grafica_zipf.png)
+*Figura 1: Distribución Zipf de Órdenes por Proveedor. A la izquierda, escala Log-Log demostrando la ley de potencia. A la derecha, la curva de concentración acumulada donde el top 1% de proveedores concentra casi el 50% del tráfico total.*
 
-### C. Estacionalidad Horaria y Mensual
+---
+
+### B. Estacionalidad Horaria y Mensual
+
+![Estacionalidad Diaria sobre 24 Meses](datos/output/grafica_estacionalidad_diaria.png)
+*Figura 2: Estacionalidad Diaria de Órdenes de Compra (24 Meses, 2024–2025). Muestra los picos característicos de fin de mes (últimos 3 días hábiles).*
+
+- **Estacionalidad Mensual:** Los **últimos 3 días hábiles de cada mes** concentran en promedio el **25.02 %** del volumen mensual de órdenes (objetivo $\approx 25\%$).
+
+![Estacionalidad Horaria por Hora del Día](datos/output/grafica_estacionalidad_horaria.png)
+*Figura 3: Distribución Horaria de la Emisión de Órdenes. Muestra la ventana pico entre 08:00 y 11:00 AM (75.07% de las órdenes) y el valle nocturno.*
+
 - **Estacionalidad Horaria:**
   - **Pico operativo (08:00 – 10:59 a.m.):** **225 211 órdenes (75.07 %)**.
   - **Valle nocturno (00:00 – 05:59 a.m.):** **6 055 órdenes (2.02 %)**.
   - **Horas sin emisión (18:00 – 23:59 p.m.):** **0 órdenes (0.00 %)**.
-- **Estacionalidad Mensual:**
-  - Los **últimos 3 días hábiles de cada mes** concentran en promedio el **25.02 %** del volumen mensual de órdenes (objetivo $\approx 25\%$).
 
-### D. Verificación de los 8 Casos Borde Sembrados
+---
 
-| # | Caso Borde | Identificador Registrado en Dataset | Estado |
-| :---: | :--- | :--- | :---: |
-| **1** | Orden con 300 líneas de detalle | `orden_id = 1` (`numero_orden = 'ORD-000000001'`, 300 líneas) | **PASA** |
-| **2** | Contrato vencido ayer | `contrato_id = 3` (`proveedor_id = 3`, `fecha_fin = '2025-12-30'`) | **PASA** |
-| **3** | Contrato que vence hoy | `contrato_id = 4` (`proveedor_id = 4`, `fecha_fin = '2025-12-31'`) | **PASA** |
-| **4** | Última franja disponible del día en un CEDI | `franja_id = 90000` (`cedi_id = 10`, `reservados = capacidad - 1`) | **PASA** |
-| **5** | Proveedor sin contrato vigente | `proveedor_id = 15` (Proveedor ACTIVO sin registro en `contrato_suministro`) | **PASA** |
-| **6** | SKU fuera del catálogo negociado del proveedor | `orden_id = 1`, `sku_id = 199999` (SKU no registrado en `proveedor_sku` para `proveedor_id = 1`) | **PASA** |
-| **7** | Proveedor "hot" con $\ge 5\,000$ órdenes | `proveedor_id = 1` (**18 486 órdenes** registradas) | **PASA** |
-| **8** | Mes sin órdenes para un proveedor activo | `proveedor_id = 410` (Proveedor ACTIVO con 0 órdenes en `2024-01`) | **PASA** |
+### C. Verificación de los 8 Casos Borde Sembrados
+
+| # | Caso Borde | Identificador Registrado en Dataset | Estado | Explicación del Caso |
+| :---: | :--- | :--- | :---: | :--- |
+| **1** | Orden con 300 líneas de detalle | `orden_id = 1` (`numero_orden = 'ORD-000000001'`) | **PASA** | Evalúa el comportamiento de payloads grandes en memoria y tiempos de serialización. |
+| **2** | Contrato vencido ayer | `contrato_id = 3` (`fecha_fin = '2025-12-30'`) | **PASA** | Valida el rechazo estricto en la frontera temporal de contratos. |
+| **3** | Contrato que vence hoy | `contrato_id = 4` (`fecha_fin = '2025-12-31'`) | **PASA** | Prueba la zona horaria y comparación de fechas lógicas del sistema. |
+| **4** | Última franja disponible en CEDI | `franja_id = 90000` (`reservados = capacidad - 1`) | **PASA** | Genera contención de concurrencia sobre el último cupo de descargue. |
+| **5** | Proveedor sin contrato vigente | `proveedor_id = 15` (Sin registro en `contrato_suministro`) | **PASA** | Camino de rechazo más frecuente en `POST /ordenes-compra/{id}/confirmacion`. |
+| **6** | SKU fuera de catálogo negociado | `orden_id = 1`, `sku_id = 199999` | **PASA** | Verifica que no se puedan ordenar productos no autorizados en el contrato. |
+| **7** | Proveedor "hot" con $\ge 5\,000$ órdenes | `proveedor_id = 1` (**18 486 órdenes**) | **PASA** | Simula particiones calientes y contención en cachés del superproveedor. |
+| **8** | Mes sin órdenes para proveedor activo | `proveedor_id = 410` (0 órdenes en `2024-01`) | **PASA** | Comprueba que los reportes de OTIF/Fill Rate manejen división por cero y agujeros de datos. |
 
 ---
 
 ## 3. Estrategia de Inyección y Carga Medida
 
-La carga masiva del dataset completo (5.44 millones de filas) se automatizó mediante el script `datos/cargar.sh`.
+![Comparativa de Estrategias de Inyección](datos/output/grafica_estrategias_inyeccion.png)
+*Figura 4: Cuadro Comparativo de Estrategias de Inyección. A la izquierda, throughput en filas por segundo. A la derecha, tiempo total de ejecución para 300,137 filas.*
 
 ### Desglose de Tiempos de Carga Masiva (Estrategia `COPY`)
 
@@ -110,6 +122,9 @@ Se evaluaron las **4 estrategias de inyección** obligatorias sobre un subconjun
 ---
 
 ## 4. Benchmark de Consultas Patrón Q1 – Q5
+
+![Latencias p50 de Consultas Q1 - Q5 en Frío vs Caliente](datos/output/grafica_latencias_consultas.png)
+*Figura 5: Comparativa de Latencia p50 (ms) para las Consultas Q1 a Q5 en Escenarios Frío vs. Caliente (Escala Logarítmica).*
 
 Se ejecutaron **200 iteraciones** por cada consulta para medir los percentiles latencia **p50, p95 y p99** en milisegundos ($ms$), comparando los escenarios de **Parámetro Frío** (proveedor de la cola larga, `proveedor_id = 50000`) y **Parámetro Caliente** (top 1% superproveedor, `proveedor_id = 1`).
 
@@ -226,7 +241,7 @@ Al medir la consulta analítica **Q4 (OTIF / Fill Rate)**:
 - En un **proveedor frío (cola larga)** con 3 órdenes: La consulta tarda **0.47 ms** (p50).
 - En el **proveedor caliente (top 1%)** con 18 486 órdenes y 92 430 líneas de orden: La consulta tarda **129.31 ms** (p50) y **169.99 ms** (p99).
 
-**¡Es un degradación de latencia de 275 veces más lento en la misma base de datos con los mismos índices creados y optimizados!**
+**¡Es una degradación de latencia de 275 veces más lento en la misma base de datos con los mismos índices creados y optimizados!**
 
 ```
 Latencia Q4 Frío (3 órdenes):       [█] 0.47 ms
