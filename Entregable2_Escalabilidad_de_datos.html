@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entregable 2 · Escalabilidad de los datos — EAFIT</title>
+<style>
+  :root{
+    --tinta:#0F2240;
+    --teal:#17607D;
+    --ambar:#D99A2B;
+    --ambar-suave:#FBF1DD;
+    --panel:#F1F4F8;
+    --linea:#D8E0E9;
+    --texto:#24313F;
+    --suave:#5E6E7F;
+    --papel:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--papel);
+    color:var(--texto);
+    font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.62;
+  }
+  .hoja{max-width:58rem;margin:0 auto;padding:0 1.6rem 6rem}
+
+  /* ---------- encabezado ---------- */
+  header.portada{
+    border-bottom:3px solid var(--tinta);
+    padding:3.2rem 0 1.6rem;
+    margin-bottom:2.6rem;
+  }
+  .curso{
+    font-size:.82rem;
+    letter-spacing:.06em;
+    color:var(--teal);
+    font-weight:600;
+    margin:0 0 1.1rem;
+  }
+  h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:700;
+    font-size:clamp(2.1rem,5.4vw,3.1rem);
+    line-height:1.08;
+    color:var(--tinta);
+    margin:0 0 .5rem;
+    letter-spacing:-.015em;
+  }
+  .bajada{
+    font-family:Georgia,serif;
+    font-style:italic;
+    font-size:1.12rem;
+    color:var(--suave);
+    margin:0 0 2rem;
+    max-width:44rem;
+  }
+  .ficha{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0;
+    border-top:1px solid var(--linea);
+  }
+  .ficha div{
+    flex:1 1 9rem;
+    padding:.85rem 1.1rem .85rem 0;
+    border-right:1px solid var(--linea);
+  }
+  .ficha div:last-child{border-right:0}
+  .ficha dt{font-size:.78rem;color:var(--suave);margin:0 0 .15rem}
+  .ficha dd{margin:0;font-size:1.02rem;font-weight:600;color:var(--tinta)}
+
+  /* ---------- índice ---------- */
+  nav.indice{
+    background:var(--panel);
+    padding:1.2rem 1.4rem;
+    margin-bottom:3rem;
+    border-left:4px solid var(--teal);
+  }
+  nav.indice ol{margin:0;padding-left:1.3rem;columns:2;column-gap:2.4rem}
+  nav.indice li{margin:.22rem 0;font-size:.95rem}
+  nav.indice a{color:var(--tinta);text-decoration:none;border-bottom:1px solid transparent}
+  nav.indice a:hover,nav.indice a:focus{border-bottom-color:var(--ambar)}
+
+  /* ---------- secciones ---------- */
+  section{margin:0 0 3.4rem;scroll-margin-top:1rem}
+  h2{
+    font-family:Georgia,serif;
+    font-size:1.72rem;
+    line-height:1.2;
+    color:var(--tinta);
+    margin:0 0 .9rem;
+    padding-bottom:.5rem;
+    border-bottom:1px solid var(--linea);
+    display:flex;
+    align-items:baseline;
+    gap:.75rem;
+  }
+  h2 .n{
+    font-family:Georgia,serif;
+    font-size:1.05rem;
+    color:var(--ambar);
+    font-weight:700;
+    flex:0 0 auto;
+  }
+  h3{
+    font-size:1.02rem;
+    color:var(--teal);
+    margin:2rem 0 .55rem;
+    font-weight:700;
+  }
+  p{margin:0 0 1rem;max-width:44rem}
+  ul,ol{max-width:44rem;padding-left:1.25rem}
+  li{margin:.3rem 0}
+  strong{color:var(--tinta)}
+  code{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:.88em;
+    background:var(--panel);
+    padding:.1em .35em;
+    border-radius:2px;
+  }
+  pre{
+    background:var(--tinta);
+    color:#DDE6F0;
+    padding:1.1rem 1.3rem;
+    overflow-x:auto;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:.85rem;
+    line-height:1.65;
+    margin:0 0 1.4rem;
+  }
+  pre .c{color:#8FA6BF}
+
+  /* ---------- citas y notas ---------- */
+  blockquote{
+    margin:1.6rem 0;
+    padding:1.1rem 1.4rem;
+    background:var(--tinta);
+    color:#F2F6FA;
+    font-family:Georgia,serif;
+    font-size:1.06rem;
+    line-height:1.5;
+  }
+  blockquote p{margin:0;max-width:none}
+  blockquote strong{color:var(--ambar)}
+  .nota{
+    border-left:4px solid var(--ambar);
+    background:var(--ambar-suave);
+    padding:.95rem 1.2rem;
+    margin:1.5rem 0;
+    font-size:.95rem;
+  }
+  .nota p{margin:0;max-width:none}
+
+  /* ---------- tablas ---------- */
+  .tabla-envoltura{overflow-x:auto;margin:0 0 1.6rem;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;font-size:.92rem}
+  caption{
+    text-align:left;
+    font-size:.86rem;
+    color:var(--suave);
+    padding-bottom:.5rem;
+  }
+  th,td{
+    border:1px solid var(--linea);
+    padding:.55rem .75rem;
+    text-align:left;
+    vertical-align:top;
+  }
+  thead th{
+    background:var(--tinta);
+    color:#fff;
+    font-weight:600;
+    font-size:.85rem;
+    line-height:1.35;
+  }
+  tbody tr:nth-child(even){background:#F7F9FB}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tfoot td{background:var(--panel);font-weight:700;color:var(--tinta)}
+
+  /* ---------- rúbrica ---------- */
+  .rubrica{font-size:.82rem}
+  .rubrica thead th{background:var(--teal);font-size:.8rem;text-align:center}
+  .rubrica thead th:first-child,
+  .rubrica thead th:nth-child(2){background:var(--tinta)}
+  .rubrica thead th .nivel{
+    display:block;
+    font-family:Georgia,serif;
+    font-size:1.5rem;
+    line-height:1;
+    margin-bottom:.15rem;
+    color:var(--ambar);
+  }
+  .rubrica th[scope="row"]{
+    background:var(--panel);
+    color:var(--tinta);
+    font-weight:700;
+    width:11rem;
+    font-size:.88rem;
+  }
+  .rubrica td.peso{
+    text-align:center;
+    font-family:Georgia,serif;
+    font-size:1.15rem;
+    color:var(--tinta);
+    font-weight:700;
+    width:4.2rem;
+    background:#F7F9FB;
+  }
+  .rubrica td{min-width:14rem;line-height:1.45}
+  .rubrica td.cero{min-width:5rem;color:var(--suave);text-align:center}
+  .rubrica tbody tr:nth-child(even){background:#fff}
+  .pista{font-size:.85rem;color:var(--suave);margin:-.9rem 0 1.6rem}
+
+  footer{
+    border-top:1px solid var(--linea);
+    margin-top:3rem;
+    padding-top:1.2rem;
+    font-size:.85rem;
+    color:var(--suave);
+  }
+
+  a{color:var(--teal)}
+  :focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
+
+  @media (max-width:640px){
+    nav.indice ol{columns:1}
+    .ficha div{border-right:0;border-bottom:1px solid var(--linea);flex-basis:100%}
+    .ficha div:last-child{border-bottom:0}
+  }
+  @media print{
+    body{font-size:10.5pt}
+    .hoja{max-width:none;padding:0}
+    nav.indice{display:none}
+    section{page-break-inside:auto;margin-bottom:2rem}
+    h2{page-break-after:avoid}
+    table{page-break-inside:auto;font-size:8.5pt}
+    tr{page-break-inside:avoid}
+    pre{background:#fff;color:#000;border:1px solid #999}
+    blockquote{background:#fff;color:#000;border-left:4px solid #000}
+    #rubrica{page-break-before:always}
+    .tabla-envoltura{overflow:visible}
+  }
+</style>
+</head>
+<body>
+<div class="hoja">
+
+<header class="portada">
+  <p class="curso">Universidad EAFIT · Aplicaciones y Sistemas Escalables</p>
+  <h1>Entregable 2<br>Escalabilidad de los datos</h1>
+  <p class="bajada">No basta con insertar filas. Los datos deben tener la forma que rompe los sistemas reales.</p>
+  <dl class="ficha">
+    <div><dt>Entrega</dt><dd>16 de septiembre</dd></div>
+    <div><dt>Peso en el curso</dt><dd>20 %</dd></div>
+    <div><dt>Reentrega</dt><dd>28 de septiembre</dd></div>
+    <div><dt>Equipos</dt><dd>2 o 3 personas</dd></div>
+  </dl>
+</header>
+
+<nav class="indice" aria-label="Contenido">
+  <ol>
+    <li><a href="#evalua">Qué se evalúa</a></li>
+    <li><a href="#ambito">Ámbito de cantidad de datos</a></li>
+    <li><a href="#inyeccion">Estrategia de inyección</a></li>
+    <li><a href="#consultas">Consultas que todos miden</a></li>
+    <li><a href="#entrega">Qué se entrega</a></li>
+    <li><a href="#devolucion">Causales de devolución</a></li>
+    <li><a href="#rubrica">Rúbrica de calificación</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="evalua">
+  <h2><span class="n">1</span> Qué se evalúa</h2>
+  <p>En la Entrega 1 dibujaron fronteras. En esta entrega esas fronteras reciben datos con volumen, sesgo, estacionalidad y casos borde. La pregunta que debe responder el entregable es una sola:</p>
+  <blockquote><p>¿Qué le pasa a mis consultas cuando el dato deja de ser de juguete?</p></blockquote>
+  <p>No se evalúa que la base «aguante». Se evalúa que ustedes <strong>midan</strong>, muestren <strong>percentiles</strong> y <strong>expliquen</strong> por qué la curva se ve como se ve.</p>
+  <p>Tres reglas heredadas siguen vigentes: un esquema por módulo (<code>proveedores</code>, <code>catalogo</code>, <code>ordenes</code>, <code>logistica</code>) sin JOIN entre esquemas; semilla fija, de modo que dos corridas produzcan el mismo conjunto; y todo levanta y carga con un solo comando.</p>
+</section>
+
+<!-- 2 -->
+<section id="ambito">
+  <h2><span class="n">2</span> Ámbito de cantidad de datos</h2>
+
+  <h3>Volumen mínimo obligatorio</h3>
+  <div class="tabla-envoltura">
+  <table>
+    <thead>
+      <tr><th>Entidad</th><th>Esquema</th><th class="num">Mínimo</th><th class="num">Objetivo</th><th>Comentario</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Proveedores</td><td><code>proveedores</code></td><td class="num">100 000</td><td class="num">100 000</td><td>Base del sesgo Zipf</td></tr>
+      <tr><td>Contratos de suministro</td><td><code>proveedores</code></td><td class="num">10 000</td><td class="num">15 000</td><td>Solo ~12 % de proveedores tiene contrato</td></tr>
+      <tr><td>SKU del catálogo negociado</td><td><code>catalogo</code></td><td class="num">200 000</td><td class="num">400 000</td><td>Precio y vigencia por SKU–contrato</td></tr>
+      <tr><td>Órdenes de compra (24 meses)</td><td><code>ordenes</code></td><td class="num">300 000</td><td class="num">500 000</td><td>Cabecera</td></tr>
+      <tr><td>Líneas de orden</td><td><code>ordenes</code></td><td class="num">1 500 000</td><td class="num">3 000 000</td><td>Promedio 5 líneas, cola larga hasta 300</td></tr>
+      <tr><td>Franjas de descargue (CEDI)</td><td><code>logistica</code></td><td class="num">90 000</td><td class="num">150 000</td><td>5 CEDI × 24 meses × franjas por día</td></tr>
+      <tr><td>Eventos de auditoría</td><td>transversal</td><td class="num">500 000</td><td class="num">800 000</td><td>Append-only, particionable por mes</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Total del conjunto</td><td class="num">≈ 2 500 000</td><td class="num">≈ 4 900 000</td><td>Filas</td></tr>
+    </tfoot>
+  </table>
+  </div>
+  <p>Un equipo que entregue cuatro mil filas «de ejemplo» no tiene entregable: tiene una demo.</p>
+
+  <div class="nota"><p>El desfase entre 100 000 proveedores y 10 000–15 000 contratos es intencional. La mayoría de proveedores está registrada pero sin contrato vigente, y ese es el camino de rechazo más frecuente de <code>POST /ordenes-compra/{id}/confirmacion</code>. Debe existir en los datos.</p></div>
+
+  <h3>Forma de los datos</h3>
+  <p>Esto es lo que se califica, no el conteo.</p>
+  <ul>
+    <li><strong>Sesgo Zipf en proveedores.</strong> El 5 % concentra el 40 % de las órdenes; el 1 % concentra cerca del 15 %. Se exige documentar el parámetro <code>s</code> de la distribución usada.</li>
+    <li><strong>Sesgo en el catálogo.</strong> El 10 % de los SKU aparece en el 60 % de las líneas de orden.</li>
+    <li><strong>Estacionalidad mensual.</strong> Los últimos tres días hábiles del mes concentran el 25 % de las órdenes.</li>
+    <li><strong>Estacionalidad horaria.</strong> Pico entre 8:00 y 11:00 a. m., valle nocturno cercano a cero.</li>
+    <li><strong>Determinismo.</strong> <code>--seed 42</code>: dos corridas producen el mismo conjunto, verificable por conteo y por checksum de una columna estable.</li>
+  </ul>
+
+  <h3>Casos borde sembrados a propósito</h3>
+  <p>Mínimo uno de cada uno, con su identificador anotado en el entregable para que el jurado pueda buscarlo.</p>
+  <div class="tabla-envoltura">
+  <table>
+    <thead><tr><th class="num">#</th><th>Caso borde</th><th>Por qué importa</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Orden con 300 líneas</td><td>Rompe supuestos de tamaño de payload y de transacción</td></tr>
+      <tr><td class="num">2</td><td>Contrato vencido ayer</td><td>Frontera temporal de la validación</td></tr>
+      <tr><td class="num">3</td><td>Contrato que vence hoy a mediodía</td><td>Zona horaria y comparación de fechas</td></tr>
+      <tr><td class="num">4</td><td>Última franja disponible del día en un CEDI</td><td>Concurrencia sobre recurso escaso</td></tr>
+      <tr><td class="num">5</td><td>Proveedor sin contrato vigente</td><td>Camino de rechazo</td></tr>
+      <tr><td class="num">6</td><td>SKU fuera del catálogo negociado del proveedor</td><td>Camino de rechazo</td></tr>
+      <tr><td class="num">7</td><td>Proveedor «hot» con 5 000 órdenes o más</td><td>Hot partition y caché sesgada</td></tr>
+      <tr><td class="num">8</td><td>Mes sin órdenes para un proveedor activo</td><td>Rompe promedios y reportes OTIF</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="inyeccion">
+  <h2><span class="n">3</span> Estrategia de inyección</h2>
+  <p>La inyección se entrega como tres programas pequeños y separados, no como un script monolítico.</p>
+<pre><span class="c">datos/</span>
+  generar.py|js|java    <span class="c"># genera → archivos CSV</span>
+  cargar.sh             <span class="c"># carga  → PostgreSQL</span>
+  verificar.sql|py      <span class="c"># comprueba volumen, sesgo y casos borde</span>
+Makefile                <span class="c"># make datos ⇒ ejecuta los tres</span></pre>
+
+  <h3>Fase 0 · Esquema limpio</h3>
+  <p><code>make db-reset</code> deja los cuatro esquemas vacíos. La carga siempre parte de cero: nada de «ya lo tenía cargado de ayer».</p>
+
+  <h3>Fase 1 · Generación por streaming a CSV</h3>
+  <ul>
+    <li>El generador escribe a disco a medida que genera. Nunca arma tres millones de filas en memoria.</li>
+    <li>Orden que respeta dependencias: proveedores → contratos → SKU → franjas → órdenes → líneas → eventos de auditoría.</li>
+    <li>Las llaves foráneas se resuelven <strong>con aritmética sobre los IDs, no consultando la base</strong>. Si los proveedores son <code>1..100000</code>, el generador muestrea Zipf sobre ese rango.</li>
+    <li>Salida: un CSV por tabla, con encabezado, UTF-8 y fechas en ISO-8601.</li>
+    <li>Se reporta tiempo de generación, tamaño en disco y filas por archivo.</li>
+  </ul>
+
+  <h3>Fase 2 · Carga masiva con COPY</h3>
+  <ol>
+    <li>Cargar con <code>COPY tabla FROM … CSV HEADER</code> o <code>\copy</code>.</li>
+    <li>Crear los índices secundarios <strong>después</strong> de la carga, no antes.</li>
+    <li><code>ANALYZE</code> en todas las tablas al terminar. Sin esto el planeador miente y las mediciones no valen.</li>
+    <li>Reportar el tiempo de cada <code>COPY</code> por tabla y el tiempo total.</li>
+  </ol>
+
+  <h3>Fase 3 · Comparación obligatoria de estrategias</h3>
+  <p>Sobre el mismo subconjunto de 50 000 órdenes, medir y tabular:</p>
+  <div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Estrategia</th><th>Qué mide</th><th class="num">Filas/segundo</th></tr></thead>
+    <tbody>
+      <tr><td><code>COPY</code> masivo</td><td>Piso teórico de la carga</td><td class="num">—</td></tr>
+      <tr><td><code>INSERT</code> por lotes de 1 000, en una transacción</td><td>Costo del protocolo y del commit</td><td class="num">—</td></tr>
+      <tr><td><code>INSERT</code> fila por fila, autocommit</td><td>El anti-patrón, con su número real</td><td class="num">—</td></tr>
+      <tr><td>Ruta transaccional de la aplicación</td><td>Costo de respetar las reglas del negocio</td><td class="num">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="pista">El equipo llena la última columna. Este cuadro es la mitad de la conversación del 16 de septiembre.</p>
+
+  <h3>Fase 4 · Inyección incremental por la ruta real</h3>
+  <p>Después de la carga masiva, insertar 5 000 órdenes adicionales a través de la ruta transaccional de la aplicación (servicio o endpoint), no por <code>COPY</code>. El objetivo es contrastar «meter datos» con «meter datos respetando las reglas del negocio»: validación de contrato, verificación de SKU y reserva de franja.</p>
+
+  <h3>Fase 5 · Verificación automática</h3>
+  <p><code>make verificar</code> imprime, y el equipo lo pega en el entregable:</p>
+  <ul>
+    <li>Conteo por tabla contra el mínimo exigido, con veredicto PASA o FALLA.</li>
+    <li>Distribución acumulada: porcentaje de órdenes que concentra el top 1 %, 5 % y 20 % de proveedores.</li>
+    <li>Órdenes por día de los últimos 60 días, para ver el pico de fin de mes.</li>
+    <li>Existencia de los ocho casos borde, con su identificador.</li>
+    <li>Checksum de determinismo.</li>
+  </ul>
+  <p>Si <code>verificar</code> no corre, el entregable se devuelve.</p>
+</section>
+
+<!-- 4 -->
+<section id="consultas">
+  <h2><span class="n">4</span> Consultas que todos miden</h2>
+  <p>Cinco consultas idénticas para todos los equipos, para que la comparación entre proyectos sea posible.</p>
+  <div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>ID</th><th>Consulta</th><th>Naturaleza</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Q1</strong></td><td>Validar proveedor y contrato vigente por <code>proveedor_id</code> y fecha</td><td>Punto. Debe estar por debajo de 10 ms</td></tr>
+      <tr><td><strong>Q2</strong></td><td>Verificar precio y vigencia de 20 SKU del catálogo negociado de un proveedor</td><td>Lote pequeño</td></tr>
+      <tr><td><strong>Q3</strong></td><td>Franjas disponibles de un CEDI para una fecha</td><td>Recurso escaso, alta concurrencia</td></tr>
+      <tr><td><strong>Q4</strong></td><td>OTIF y fill rate por proveedor y mes, sobre 24 meses</td><td>Analítica pesada</td></tr>
+      <tr><td><strong>Q5</strong></td><td>Últimas 50 órdenes de un proveedor del top 1 %, paginadas</td><td>Hot partition y paginación</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Protocolo de medición</h3>
+  <ul>
+    <li>200 ejecuciones por consulta, con parámetros variados tomados del conjunto real.</li>
+    <li>Reportar <strong>p50, p95 y p99</strong>. Un promedio solo cuesta −10 %.</li>
+    <li>Dos escenarios por consulta: parámetro frío (proveedor de la cola larga) y parámetro caliente (proveedor del top 1 %). La diferencia entre ambos es el hallazgo.</li>
+    <li>Para Q4 y Q5: <code>EXPLAIN (ANALYZE, BUFFERS)</code> antes y después del índice que decidan crear, con la justificación de por qué ese índice y no otro.</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section id="entrega">
+  <h2><span class="n">5</span> Qué se entrega</h2>
+  <p>Un repositorio y un documento corto de máximo ocho páginas. Nada más.</p>
+
+  <h3>En el repositorio</h3>
+  <ul>
+    <li><code>datos/generar</code>, <code>datos/cargar</code>, <code>datos/verificar</code></li>
+    <li><code>Makefile</code> con <code>make datos</code> funcionando desde cero</li>
+    <li><code>modelo-fisico.sql</code>: DDL de los cuatro esquemas con índices y comentarios</li>
+    <li>Salida cruda de las mediciones en CSV o JSON, no solo la gráfica</li>
+  </ul>
+
+  <h3>En el documento</h3>
+  <ol>
+    <li>Tabla de volumen logrado contra volumen exigido.</li>
+    <li>Gráfica de la distribución Zipf lograda y gráfica de órdenes por día.</li>
+    <li>Tiempos de carga por tabla y el cuadro comparativo de las cuatro estrategias de inyección.</li>
+    <li>Tabla de las cinco consultas con p50, p95 y p99, en frío y en caliente.</li>
+    <li><code>EXPLAIN</code> antes y después de al menos dos índices, con la decisión explicada.</li>
+    <li><strong>Un hallazgo incómodo</strong>: algo que midieron y no esperaban, escrito con honestidad.</li>
+  </ol>
+  <blockquote><p>Predecir mal y documentarlo puntúa más que mostrar solo gráficas verdes.</p></blockquote>
+</section>
+
+<!-- 6 -->
+<section id="devolucion">
+  <h2><span class="n">6</span> Causales de devolución</h2>
+  <p>Un entregable devuelto no es nota baja: es un entregable que incumple un requisito obligatorio y debe corregirse.</p>
+  <ul>
+    <li>El conjunto no alcanza el volumen mínimo, o es uniforme y sin sesgo.</li>
+    <li><code>make datos</code> no corre desde cero en una máquina limpia.</li>
+    <li>Las mediciones se presentan sin percentiles.</li>
+    <li>Gráficas sin unidades o sin declarar el volumen bajo el que se midió.</li>
+    <li>Un solo esquema compartido entre módulos.</li>
+    <li>Dos corridas con la misma semilla producen conjuntos distintos.</li>
+  </ul>
+  <div class="nota"><p><strong>Penalizaciones transversales vigentes:</strong> datos uniformes o de juguete −15 % · un solo esquema compartido entre módulos −15 % · promedios sin percentiles −10 %.</p></div>
+</section>
+
+<!-- rúbrica -->
+<section id="rubrica">
+  <h2><span class="n">7</span> Rúbrica de calificación</h2>
+  <p>La nota del entregable es la suma de la nota de cada ítem multiplicada por su porcentaje. Escala de 5 a 0.</p>
+
+  <div class="tabla-envoltura">
+  <table class="rubrica">
+    <caption>Entregable 2 · Escalabilidad de los datos · 20 % del curso</caption>
+    <thead>
+      <tr>
+        <th scope="col">Ítem</th>
+        <th scope="col">Peso</th>
+        <th scope="col"><span class="nivel">5</span>Excelente</th>
+        <th scope="col"><span class="nivel">4</span>Sobresaliente</th>
+        <th scope="col"><span class="nivel">3</span>Bueno</th>
+        <th scope="col"><span class="nivel">2</span>Suficiente</th>
+        <th scope="col"><span class="nivel">1</span>Insuficiente</th>
+        <th scope="col"><span class="nivel">0</span>No entregó</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Volumen del conjunto y modelo físico</th>
+        <td class="peso">15 %</td>
+        <td>Supera el volumen objetivo con un modelo físico donde cada tabla, tipo de dato e índice está justificado. El DDL evidencia decisiones de escalabilidad —particionamiento, tipos compactos, llaves— explicadas y coherentes con las consultas que soportan.</td>
+        <td>Cumple el volumen objetivo en todas las entidades. El modelo físico es sólido, con índices pertinentes y un esquema por módulo respetado. Alguna decisión de tipos o llaves podría estar mejor sustentada.</td>
+        <td>Cumple el volumen mínimo en todas las entidades. El modelo físico es correcto y respeta la separación por esquemas, aunque los índices parecen elegidos por costumbre más que por la consulta que sirven.</td>
+        <td>Cumple el volumen mínimo de forma parcial o solo en algunas entidades. El modelo funciona pero muestra decisiones arbitrarias, tipos sobredimensionados o índices que nadie usa.</td>
+        <td>No alcanza el volumen mínimo, el conjunto es de juguete o se comparte un solo esquema entre módulos. La cantidad de datos no permite observar ningún comportamiento de escala.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+      <tr>
+        <th scope="row">Sesgo, estacionalidad y casos borde</th>
+        <td class="peso">20 %</td>
+        <td>El sesgo Zipf, la estacionalidad mensual y horaria y los ocho casos borde están presentes, medidos y graficados. El equipo explica qué patología del sistema real reproduce cada uno y localiza los casos borde por identificador.</td>
+        <td>Sesgo y estacionalidad implementados y verificados con evidencia. Los casos borde están casi en su totalidad y bien documentados. Falta profundidad en la interpretación de alguno.</td>
+        <td>Existe sesgo declarado y verificable, y varios casos borde sembrados. La estacionalidad es simple o solo en una escala. La evidencia es correcta pero descriptiva, sin interpretación.</td>
+        <td>Se intenta el sesgo pero la distribución lograda no se verifica, o los casos borde se mencionan sin poder localizarlos en los datos. La forma del dato se afirma, no se demuestra.</td>
+        <td>Los datos son uniformes o aleatorios sin forma. No hay sesgo, estacionalidad ni casos borde: el conjunto esconde los hot partitions y hace que cualquier caché parezca genial.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+      <tr>
+        <th scope="row">Generador determinista y parametrizable</th>
+        <td class="peso">10 %</td>
+        <td>El generador es determinista, parametrizable en volumen y sesgo, genera por streaming sin cargar todo en memoria y resuelve llaves foráneas por aritmética. Se demuestra con checksum que dos corridas con la misma semilla producen conjuntos idénticos.</td>
+        <td>Generador determinista y parametrizable, con semilla fija demostrada. El diseño es limpio y eficiente, con alguna concesión menor en memoria o en configurabilidad.</td>
+        <td>El generador funciona y usa semilla fija. Es poco parametrizable o consume más memoria de la necesaria, pero produce el conjunto exigido de forma repetible.</td>
+        <td>Produce datos pero el determinismo no se demuestra o falla parcialmente. Requiere intervención manual o cambios en el código para ajustar el volumen.</td>
+        <td>No hay generador reutilizable: los datos vienen de un volcado, de un script irrepetible o de una fuente que el equipo no puede reproducir.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+      <tr>
+        <th scope="row">Estrategia de inyección y carga medida</th>
+        <td class="peso">20 %</td>
+        <td>Las cuatro estrategias están medidas sobre el mismo subconjunto y tabuladas en filas por segundo. El equipo explica el porqué de cada diferencia —commit, protocolo, índices, validaciones— y decide con base en el número.</td>
+        <td>Se comparan al menos tres estrategias con tiempos reales y una interpretación correcta. La secuencia de carga, la creación posterior de índices y el <code>ANALYZE</code> están presentes y justificados.</td>
+        <td>La carga masiva por <code>COPY</code> está implementada y cronometrada, con una comparación básica contra <code>INSERT</code>. La secuencia es correcta aunque la interpretación es superficial.</td>
+        <td>Hay carga masiva y algún tiempo reportado, pero sin comparación entre estrategias o sin controlar el subconjunto. Faltan pasos como el <code>ANALYZE</code> posterior y no se advierte su efecto.</td>
+        <td>La carga es la única que el equipo probó, no está cronometrada o toma un tiempo que hace inviable repetirla. No hay estrategia: hay un script que algún día terminó.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+      <tr>
+        <th scope="row">Medición de consultas con percentiles y planes</th>
+        <td class="peso">25 %</td>
+        <td>Las cinco consultas están medidas con p50, p95 y p99, en frío y en caliente, con volumen y carga declarados. Los <code>EXPLAIN</code> antes y después sustentan cada índice creado y el equipo explica el plan, no solo el tiempo. Las conclusiones salen de lo medido.</td>
+        <td>Las cinco consultas están medidas con percentiles en ambos escenarios y hay <code>EXPLAIN</code> antes y después de los índices principales. La lectura de los planes es correcta con alguna imprecisión menor.</td>
+        <td>Las consultas están medidas con percentiles, pero falta el contraste frío y caliente, o el análisis de planes se limita a mostrar la salida sin interpretarla.</td>
+        <td>Se reportan tiempos de consulta de forma incompleta, con promedios junto a algún percentil, o sin declarar bajo qué volumen y con qué parámetros se midió.</td>
+        <td>Las mediciones se presentan solo como promedios, sin percentiles, sin unidades o sin carga declarada. No es posible saber qué se midió ni reproducirlo.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+      <tr>
+        <th scope="row">Reproducibilidad, evidencia y hallazgo</th>
+        <td class="peso">10 %</td>
+        <td>Un solo comando levanta y carga todo desde cero en una máquina limpia. Se entrega la salida cruda de las mediciones además de las gráficas, y el hallazgo incómodo es real, está medido y cambió una decisión de diseño del equipo.</td>
+        <td>El comando único funciona y la evidencia cruda está disponible. El hallazgo reportado es honesto y pertinente, aunque su efecto sobre el diseño se explora poco.</td>
+        <td>El sistema carga con el comando documentado tras algún ajuste menor. La evidencia está presente y hay un hallazgo reportado, más descriptivo que revelador.</td>
+        <td>La carga requiere pasos manuales no documentados. Solo se entregan gráficas sin datos crudos, y el hallazgo es genérico o previsible.</td>
+        <td>El proceso solo corre en el portátil de quien lo escribió, no hay evidencia verificable y no se reporta ningún hallazgo: se afirma que todo funcionó bien.</td>
+        <td class="cero">No entregó</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr><td>Total</td><td class="peso">100 %</td><td colspan="6">Nota del entregable = Σ (nota del ítem × peso del ítem), antes de penalizaciones transversales.</td></tr>
+    </tfoot>
+  </table>
+  </div>
+
+  <div class="nota"><p>La reentrega del 28 de septiembre limita la nota del componente reentregado al 80 %. Una sola reentrega por entregable, y no libera de la fecha del entregable siguiente.</p></div>
+</section>
+
+<footer>
+  <p>Universidad EAFIT · Aplicaciones y Sistemas Escalables · Proyecto integrador: portal B2B de proveedores de retail. Entregable 2 de 4, con defensa ante el grupo el 16 de noviembre.</p>
+</footer>
+
+</div>
+</body>
+</html>

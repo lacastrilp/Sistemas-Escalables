@@ -1,0 +1,1579 @@
+PORTAL B2B RETAIL
+Campo
+
+Información
+
+Título
+
+Portal B2B Retail - Documento de Diseño (Entrega 1, versión corregida)
+
+Grupo
+
+EKS
+
+Integrantes
+
+Sara Lopez Marin / Luis Alejandro Castrillon Pulgarin
+
+Endpoint central
+
+POST /ordenes-compra/{id}/confirmación
+
+Fecha de esta versión
+
+11/09/2026
+
+1. Glosario del dominio
+Términos usados a lo largo del documento, en el orden en que resultan más relevantes para entender el flujo
+de confirmación de órdenes.
+Término
+
+Definición
+
+OTIF
+
+On-Time In-Full. Indicador que mide el porcentaje de órdenes entregadas completas
+y a tiempo, respecto del total de órdenes confirmadas en el periodo.
+
+Fill Rate
+
+Porcentaje de unidades o líneas de una orden que se despachan efectivamente
+frente a lo solicitado por el proveedor, sin contar faltantes.
+
+CEDI
+
+Centro de Distribución. Instalación física donde se descargan los productos de los
+proveedores; tiene franjas horarias de descarga con capacidad finita.
+
+Franja CEDI
+
+Bloque de tiempo (por ejemplo, de 1 hora) en un CEDI, con un cupo máximo de
+camiones/proveedores que pueden descargar en simultáneo.
+
+SKU
+
+Stock Keeping Unit. Identificador único de un producto o prestación específica
+dentro del catálogo negociado con un proveedor.
+
+Catálogo
+negociado
+
+Subconjunto de SKUs y precios que un proveedor tiene autorizados y vigentes según
+su contrato con la cadena de retail.
+
+Idempotency-K
+ey
+
+Encabezado HTTP que identifica de forma única un intento de confirmación de
+orden, usado para evitar procesar dos veces la misma solicitud ante reintentos de
+red.
+
+Circuit Breaker
+
+Patrón de resiliencia que corta temporalmente las llamadas hacia una dependencia
+externa que está fallando, para evitar el agotamiento de recursos propios (thread
+exhaustion).
+
+Bulkhead
+
+Patrón de resiliencia que aísla el pool de hilos/conexiones usado para una
+dependencia específica, para que su falla no consuma los recursos del resto del
+sistema.
+
+Patron Outbox
+
+Técnica que guarda el evento a publicar en la misma transacción de base de datos
+que el cambio de negocio, y un proceso separado (worker) lo envía luego al broker,
+evitando perder eventos si el broker falla.
+
+Término
+
+Definición
+
+Deriva de
+configuración
+
+Diferencia entre el estado deseado de un recurso y su estado real desplegado, que
+aparece cuando un cambio no queda registrado ni controlado.
+
+SPOF
+
+Single Point of Failure (punto único de falla). Componente cuya caída detiene una
+función crítica del sistema completo porque no existe redundancia ni degradación
+controlada.
+
+Cuello de
+botella
+
+Componente que no detiene el sistema pero limita su capacidad bajo carga alta,
+generando contención, colas o latencia creciente sin llegar a una caída total.
+
+faults.yaml
+
+Archivo de configuración recargable en caliente que define qué fallas debe inyectar
+el Motor de Fallas (latencia, error, caída) sobre un componente, sin necesidad de
+desplegar la aplicación.
+
+RED / USE
+
+Metodologías de métricas de observabilidad. RED (Rate, Errors, Duration) para
+servicios; USE (Utilization, Saturation, Errors) para recursos como CPU, memoria o
+pools de conexión.
+
+ADR
+
+Architecture Decisión Record. Documento corto que deja constancia de una
+decisión de arquitectura, sus alternativas consideradas y sus consecuencias.
+
+2. A. Alcance
+2.1 Dentro del alcance (in-scope)
+●​ Implementación del monolito modular con los 4 módulos funcionales: proveedores, catálogo, órdenes,
+logística, con un esquema de base de datos por módulo (sin JOIN entre esquemas).
+●​ Endpoint transaccional POST /ordenes-compra/{id}/confirmación, con los 6 pasos del flujo de
+confirmación (sección 3).
+●​ Integración con un Stub simulador de validación tributaria/crédito, con latencia y tasa de error
+configurables.
+●​ Generación y publicación del evento Orden Confirmada mediante patrón Outbox.
+●​ Réplica de lectura de PostgreSQL dedicada a las consultas analíticas OTIF/Fill Rate.
+●​ Panel de observabilidad (trazas, metálicas RED/USE) y simulación de fallas mediante faults.yaml con kill
+switch.
+●​ Verificación automatizada de fronteras entre módulos en el pipeline de CI
+(ArchUnit/Modulith/Packwerk según el lenguaje elegido).
+2.2 Fuera del alcance (out-of-scope)
+Además de las exclusiones explícitas de la versión anterior, se nombran a continuación las exclusiones que
+antes quedaban implícitas o genericas:
+●​ Pasarela de pagos en vivo o integraciones bancarias reales.
+
+●​ Interfaz de usuario compleja (frontend SPA/móvil); el sistema se evalúa vía API y pruebas de carga con
+k6/Gatling.
+●​ Integración con sistemas ERP o WMS de terceros: el inventario físico y la facturación se asumen
+resueltos por sistemas externos fuera del alcance del semestre.
+●​ Módulo de facturación electrónica y su validación ante autoridades fiscales reales (se simula
+únicamente vía el Stub).
+●​ Gestión de inventario físico dentro del CEDI (conteo, picking, packing): el sistema solo reserva la franja
+de descargue, no gestiona la operación logística interna del CEDI.
+●​ Planeación y ejecución de la última milla (entrega al punto de venta final).
+●​ Extracción de un módulo del monolito hacia un microservicio independiente: queda fuera de esta
+entrega y se evaluará con datos reales de contención en entregas futuras.
+2.3 Supuestos
+●​ La infraestructura correrá completamente en contenedores (Docker / Docker Compose), con despliegue
+mediante un único comando ejecutable.
+●​ Las peticiones de confirmación de orden incluyen el encabezado Idempotency-Key generado por el
+cliente (proveedor).
+●​ Se dispone de una carga de datos sintética representativa antes de ejecutar las pruebas de la Entrega 2;
+no se usarán datos productivos reales.
+●​ El equipo cuenta con un entorno de contenedores local suficiente para levantar los 3 app servers,
+PostgreSQL primaria y réplica, Redis y el broker de mensajes de forma simultánea durante las pruebas
+de carga.
+2.4 Restricciones del proyecto
+Las restricciones se presentan ahora como una lista propia, separada de los supuestos:
+●​ Uso obligatorio de un esquema por módulo en PostgreSQL (sin consultas SQL con JOIN entre
+esquemas).
+●​ Verificación estricta de fronteras mediante herramientas en CI (ArchUnit en Java / Modulith / Packwerk
+en Ruby).
+●​ Despliegue con un único comando ejecutable (docker compose up).
+●​ Extracción permitida de exactamente un módulo hacia un servicio independiente en entregas
+posteriores, únicamente si la evidencia de contención (métricas RED/USE) lo justifica; no se permite
+dividir más de un módulo en esta fase del proyecto.
+2.5 Criterio de terminación de este entregable
+Este entregable de diseño se considera terminado cuando: (1) el documento declara explícitamente que queda
+dentro y fuera de alcance, con exclusiones nombradas y no genéricas; (2) supuestos y restricciones están
+enunciados por separado, uno a uno; (3) los RF y RNF son atómicos, numerados y trazables a los pasos del
+
+endpoint y a los SPOF; (4) los tres niveles del diagrama C4 y el diagrama de arquitectura de referencia son
+coherentes entre sí y con las decisiones ADR; y (5) cada SPOF tiene un mecanismo de mitigación asociado y
+una clasificación de impacto.
+3. B. Descripción del dominio del sistema
+3.1 Flujo de confirmación de orden
+El sistema procesa la interacción entre miles de proveedores y una gran cadena de retail. La operación central
+es la confirmación de una orden de compra mediante el endpoint POST /ordenes-compra/{id}/confirmación,
+que recorre seis pasos:
+●​ 1. Validar Proveedor y Contrato Vigente.
+●​ 2. Verificar SKUs del Catálogo Negociado.
+●​ 3. Reservar Franja CEDI (recurso escaso, con bloqueo pesimista).
+●​ 4. Consulta Tributaria y de Crédito (dependencia externa lenta, timeout 1.5 s).
+●​ 5. Confirmar Orden respetando la Idempotency-Key.
+●​ 6. Publicar el evento OrdenConfirmada (patrón Outbox).
+3.2 Actores y stakeholders
+Actor
+
+Necesidad o interés
+
+Criticidad para el
+sistema
+
+Proveedor B2B
+
+Confirmar órdenes de compra con agilidad y
+asegurar su franja de entrega, sin sobreventas ni
+rechazos injustificados.
+
+Alta: es quien inicia la
+transacción crítica del
+sistema.
+
+Operador Logístico
+(CEDI)
+
+Controlar la capacidad física de descargue por
+hora/día y evitar duplicación de citas en la franja.
+
+Alta: su recurso (franja)
+es el cuello de botella
+físico del negocio.
+
+Sistema Tributario /
+Financiero (externo)
+
+Validar la situación fiscal y el cupo de crédito del
+proveedor antes de aceptar el compromiso.
+
+Media: no es un usuario
+humano, pero
+condiciona la
+confirmación y es la
+dependencia más frágil.
+
+Analista de Retail
+
+Consultar en casi tiempo real el nivel de servicio
+(OTIF/Fill Rate) sin afectar la operación
+transaccional.
+
+Media: su carga de
+lectura no debe
+degradar las escrituras.
+
+3.3 Modelo de entidades y relaciones
+Se presenta el modelo de entidades con sus atributos principales y la cardinalidad de sus relaciones. Este
+modelo es la base para el esquema por módulo declarado en las restricciones y para el diagrama de
+componentes.
+
+Figura 1. Modelo de entidades y relaciones del dominio de confirmación de órdenes.
+3.4 Ciclo de vida de la orden de compra
+El estado de una Orden Compra evoluciona según el resultado de cada paso del flujo de confirmación. Una
+orden puede rechazarse en cualquiera de las primeras cuatro validaciones, y solo se libera la franja reservada si
+el rechazo ocurre después de haberla reservado (paso 3 en adelante).
+
+Figura 2. Diagrama de estados de la orden de compra.
+3.5 Justificación de la partición en los cuatro módulos
+La partición en los cuatro módulos (proveedores, catálogo, órdenes, logística) no es arbitraria: cada módulo
+corresponde a un límite de propiedad de datos y de tasa de cambio distinta dentro del dominio. Proveedores y
+Catálogo cambian con baja frecuencia (altas/renovaciones de contrato, actualización de precios negociados) y
+son consultados, no escritos, durante la confirmación. Órdenes concentra el estado transaccional de alta
+escritura y es el único módulo que necesita garantías fuertes de independencia y consistencia. Logística aísla el
+recurso físico escaso (franja CEDI) porque su patrón de acceso es de alta contención concurrente, muy distinto
+al de los otros tres módulos, y es el candidato más probable a extraerse como servicio independiente si la
+evidencia de contención lo justifica. Esta separación también refleja los límites naturales de las reglas de
+
+negocio: un cambio en la política de crédito de un proveedor no debería requerir tocar el código de reserva de
+franjas, y viceversa.
+3.6 Reglas de negocio de la confirmación
+●​ Una orden sólo puede confirmarse si el proveedor tiene un contrato vigente al momento de la solicitud
+(RF01).
+●​ Todos los SKU de la orden deben pertenecer al catálogo negociado vigente del proveedor; un solo SKU
+fuera de catálogo rechaza la orden completa (RF02).
+●​ Una franja CEDI no puede asignarse a más órdenes que su capacidad máxima; la reserva es exclusiva y
+no reversible una vez confirmada (RF03, RNF01).
+●​ La validación tributaria/de crédito tiene un timeout máximo de 1.5 segundos; superado ese tiempo, la
+orden se rechaza y la franja reservada se libera automáticamente (RF04, RNF04).
+●​ Una misma Idempotency-Key nunca debe producir dos órdenes confirmadas ni dos eventos
+OrdenConfirmada distintos (RF05, RNF 09).
+●​ El evento OrdenConfirmada debe emitirse si y sólo si la orden quedó confirmada en base de datos, sin
+pérdida ni duplicación (RF06).
+3.7 Tensiones del dominio
+Tensión
+
+Descripción
+
+Consecuencia física/negocio
+
+Recurso escaso y
+concurrente
+
+Reserva de franjas de descargue en el CEDI. Si
+dos proveedores intentan reservar la última
+cita disponible al mismo tiempo, el sistema no
+puede sobrevender ni compensar después.
+
+Colas de camiones en el CEDI y
+reprogramaciones que rompen el
+compromiso de entrega.
+
+Dependencia
+externa lenta
+
+La validación tributaria y de crédito es
+intermitente y tiene latencia o timeouts
+propios; es la palanca principal de fallas en
+cascada.
+
+Agotamiento de hilos/conexiones
+(thread exhaustion) y caída del
+throughput general del sistema.
+
+Lectura analitica
+pesada
+
+Degradación de la latencia de
+Consultas de OTIF y Fill Rate sobre 24 meses de
+confirmación de órdenes si comparten
+historial que compiten directamente con las
+el mismo motor de base de datos sin
+escrituras transaccionales.
+aislamiento.
+
+4. C. Requisitos funcionales y no funcionales
+4.1 Requisitos funcionales (RF)
+Cada RF cubre exactamente uno de los seis pasos del flujo de confirmación, de forma atómica y verificable de
+manera independiente.
+
+Umbral objetivo
+
+Metodo de
+verificacion
+
+100% en el set
+de prueba
+
+Prueba unitaria
++ prueba de
+contrato con
+casos
+vigente/vencido
+/inexistente
+
+% de órdenes
+con SKU no
+negociado
+correctamente
+rechazadas
+
+100% en el set
+de prueba
+
+Prueba de
+integración con
+catálogo
+cargado
+
+Correctitud
+funcional /
+concurrencia
+
+% de reservas
+concurrentes
+sin sobreventa
+
+100% bajo
+prueba de
+concurrencia (N
+hilos, 1 franja)
+
+Prueba de carga
+dirigida: N
+solicitudes
+simultáneas por
+la última franja
+disponible
+
+Correctitud
+funcional /
+resiliencia
+
+% de llamadas
+que respetan el 100%
+timeout de 1.5 s
+
+Prueba con Stub
+configurado a
+latencia > 1.5 s
+via faults.yaml
+
+% de reintentos
+que generan
+una segunda
+orden o un
+segundo evento
+
+0%
+
+Prueba de
+reintento:
+enviar la misma
+petición 5 veces
+en paralelo
+
+100% (sin
+perdida, con
+reintento)
+
+Prueba de caos:
+derribar el
+broker tras
+confirmar y
+verificar
+publicación al
+restaurar
+
+ID
+
+Requisito / escenario
+
+Atributo
+
+Métrica
+
+RF01
+
+Ante una solicitud de
+confirmación, el sistema
+debe validar que el
+proveedor tenga un
+contrato vigente antes de
+continuar el flujo.
+
+Correctitud
+funcional
+
+% de solicitudes
+con contrato
+invalido
+correctamente
+rechazadas
+
+RF02
+
+Ante una solicitud de
+confirmación, el sistema
+debe verificar que todos
+los SKU de la orden
+pertenezcan al catálogo
+negociado vigente del
+proveedor.
+
+Correctitud
+funcional
+
+RF03
+
+Ante una solicitud con
+contrato y catálogo
+válidos, el sistema debe
+reservar de forma
+exclusiva una franja CEDI,
+sin permitir
+sobreasignación.
+
+RF04
+
+Ante una franja reservada,
+el sistema debe consultar
+el estado tributario y de
+crédito del proveedor
+antes de confirmar.
+
+RF05
+
+Ante una solicitud repetida
+con la misma
+Idempotency-Key, el
+Correctitud
+sistema debe devolver el
+funcional /
+resultado de la
+idempotencia
+confirmación original sin
+reprocesar ni duplicar
+efectos.
+
+RF06
+
+Ante una orden
+confirmada, el sistema
+debe publicar el evento
+Orden Confirmada de
+forma asíncrona usando el
+patrón Outbox.
+
+Correctitud
+funcional /
+consistencia
+
+% de órdenes
+confirmadas
+cuyo evento se
+publica
+eventualmente
+
+ID
+
+Requisito / escenario
+
+Atributo
+
+Métrica
+
+RF07
+
+El sistema debe exponer
+endpoints de consulta de
+OTIF y Fill Rate acumulado
+sobre 24 meses de
+historial, resueltos contra
+la réplica de lectura.
+
+Correctitud
+funcional /
+aislamiento de
+carga
+
+% de consultas
+resueltas contra
+la replica (no
+contra la
+primaria)
+
+RF08
+
+El sistema debe permitir
+configurar, sin
+redespliegue, la latencia y
+la tasa de error inyectadas
+sobre el Stub tributario y
+sobre los app servers
+mediante faults.yaml.
+
+Tiempo entre
+cambio de
+Configurabilidad faults.yaml y
+efecto
+observable
+
+Umbral objetivo
+
+Metodo de
+verificacion
+
+100%
+
+Inspección de
+plan de
+ejecución / logs
+de conexión por
+rol
+
+<= 5 s (recarga
+en caliente)
+
+Prueba manual:
+modificar
+faults.yaml y
+medir el cambio
+en
+latencia/errores
+reportados
+
+4.2 Requisitos no funcionales (RNF)
+Se agregan los RNF que el entregable anterior no declaraba (sesgo, presupuesto de error, SLO analitico,
+modularidad, reproducibilidad, configurabilidad de fallas) y se hacen medibles los que antes no lo eran.
+ID
+
+RNF01
+
+RNF02
+
+Atributo de
+calidad
+
+Métrica
+
+Concurrencia y
+aislamiento
+
+Volumetría
+mínima
+
+Umbral objetivo
+
+Metodo de verificacion
+
+% de reservas de franja sin
+lecturas sucias ni
+condiciones de carrera bajo
+50 solicitudes concurrentes
+por la misma franja
+
+0 sobreasignaciones
+
+Prueba de carga
+dirigida con SELECT
+FOR UPDATE o lock
+distribuido; verificación
+del conteo final de
+cupos
+
+Registros cargados en la
+base de prueba
+
+100.000
+proveedores;
+10.000-15.000
+contratos vigentes;
+hasta 400.000 SKU;
+500.000 órdenes; >=
+500.000 eventos de
+auditoría/outbox
+acumulados
+
+Script de carga de
+datos con conteo
+posterior por tabla
+
+ID
+
+Atributo de
+calidad
+
+Métrica
+
+Umbral objetivo
+
+Metodo de verificacion
+
+RNF03
+
+Distribución no
+uniforme de la
+carga (sesgo)
+
+% de tráfico concentrado en
+el 5% de proveedores más
+activos, y % de órdenes en
+las 4 horas pico del dia
+
+5% de proveedores
+generan al menos
+40% del tráfico; 60%
+de las órdenes se
+concentran en 4
+franjas horarias pico
+(estacionalidad)
+
+Inspección del
+generador de carga
+k6/Gatling y del script
+de datos sintéticos;
+auditoría de que la
+distribución no es
+uniforme
+
+RNF04
+
+Latencia
+operativa
+(declarada con
+carga)
+
+p95 de latencia del endpoint
+de confirmación, bajo 200
+rps sostenidos durante 10
+minutos
+
+p95 < 400 ms; tasa
+de error < 1%
+
+Prueba de carga con
+k6/Gatling, reporte
+p50/p95/p99 y tasa de
+error en Grafana
+
+Presupuesto de error
+<= 0.5% del total de
+solicitudes en 30 días
+(equivalente a un SLO
+de disponibilidad de
+99.5% para el
+endpoint de
+confirmación)
+
+Cálculo mensual sobre
+métricas RED de
+Prometheus (tasa de
+error acumulada vs
+presupuesto)
+
+RNF05
+
+Presupuesto de
+error (error
+budget)
+
+% de solicitudes de
+confirmación que pueden
+fallar en una ventana de 30
+días sin incumplir el SLO
+acordado
+
+RNF06
+
+SLO de la
+consulta analitica
+(latencia y
+frescura)
+
+p95 de latencia de /otif y
+/fill-rate; y lag de replicación
+tolerado entre primaria y
+réplica
+
+p95 < 800 ms; lag de
+replicación <= 5
+minutos
+
+Prueba de carga sobre
+endpoints analiticos +
+monitoreo de
+replication lag en
+Postgres
+
+RNF07
+
+Tolerancia a fallas
+de la
+dependencia
+externa
+
+Tiempo máximo que una
+llamada al Stub puede
+bloquear un hilo de la
+aplicación
+
+<= 1.5 s por llamada
+(Circuit Breaker +
+Bulkhead); el colapso
+del Stub no debe
+agotar el pool
+principal
+
+Prueba de caos: Stub
+en modo latencia
+alta/caído via
+faults.yaml, medir hilos
+disponibles del pool
+principal
+
+RNF08
+
+% de verificaciones de
+Modularidad y
+frontera entre módulos que
+propiedad de
+pasan en el pipeline de CI
+datos por módulo (ArchUnit/Modulith/Packwe
+rk)
+
+100% de las reglas de
+frontera declaradas
+deben pasar antes de
+mergear (0
+violaciones
+permitidas)
+
+Ejecución del pipeline
+de CI con el chequeo
+de arquitectura como
+gate obligatorio
+
+ID
+
+Atributo de
+calidad
+
+Métrica
+
+RNF09
+
+Consistencia:
+cero
+sobreasignación y
+cero
+confirmaciones
+duplicadas
+
+Reproducibilidad
+
+RNF10
+
+Umbral objetivo
+
+Metodo de verificacion
+
+N.o de franjas sobre
+asignadas y N.o de órdenes
+duplicadas por reintento de
+Idempotency-Key, sobre el
+total de pruebas
+
+0 en ambos casos
+
+Prueba de concurrencia
+(RNF01) + prueba de
+reintento (RF05)
+combinadas
+
+Diferencia entre dos
+ejecuciones de carga con la
+misma configuración y
+semilla de datos sintéticos
+
+Variación de p95 <=
+10% entre corridas
+repetidas con la
+misma semilla
+
+Dos ejecuciones
+idénticas del generador
+de carga con semilla
+fija, comparación de
+reportes
+
+4.3 Volumetría de referencia (detalle de RNF02)
+Entidad
+
+Volumen mínimo exigido
+
+Proveedores
+
+100.000
+
+Contratos vigentes
+
+10.000 - 15.000
+
+SKU (catálogo negociado)
+
+hasta 400.000
+
+Órdenes de compra almacenadas
+
+500.000
+
+Eventos de auditoría / outbox acumulados
+
+>= 500.000
+
+4.4 Distribución no uniforme de los datos sintéticos (detalle de RNF03)
+Para evitar el antipatrón de datos uniformes (penalizado con -15% según el enunciado del curso), el generador
+de datos sintéticos y el generador de carga deben reproducir sesgo real del dominio:
+●​ Sesgo de proveedores: el 5% de los proveedores más activos debe concentrar al menos el 40% del
+volumen de órdenes.
+●​ Estacionalidad horaria: al menos el 60% de las órdenes debe concentrarse en 4 franjas horarias pico del
+día (por ejemplo, apertura de bodega y cierre de jornada).
+●​ Popularidad de SKU: una distribución tipo Pareto (80/20) sobre la frecuencia de SKU solicitados, en vez
+de una selección aleatoria uniforme.
+4.5 Presupuesto de error y SLO (detalle de RNF05 y RNF06)
+El presupuesto de error formaliza cuanta falla es aceptable sin incumplir el compromiso de servicio, en vez de
+exigir cero errores:
+●​ Endpoint de confirmación: SLO de disponibilidad de 99.5% en ventanas de 30 días -> presupuesto de
+error de 0.5% de las solicitudes.
+
+●​ Endpoints analiticos (OTIF/Fill Rate): p95 < 800 ms y lag de replicación tolerado <= 5 minutos; una
+consulta que exceda ese lag debe declarar la antigüedad del dato en la respuesta, no fallar.
+4.6 Matriz de trazabilidad RF - RNF - Puntos de falla
+Esta matriz conecta cada requisito funcional con los requisitos no funcionales que lo acotan y con el punto
+único de falla que motiva esa exigencia, ausente en la versión anterior del documento.
+RF
+
+SPOF relacionado
+
+Relación
+
+RNF08 (modularidad,
+RF01
+módulo Proveedores)
+
+-
+
+Valida el límite del módulo
+Proveedores sobre datos
+de Contrato.
+
+RNF08 (modularidad,
+modulo Catalogo)
+
+-
+
+Valida el límite del módulo
+Catálogo.
+
+RF02
+
+RNF relacionados
+
+RF03 RNF01, RNF09
+
+El requisito de exclusividad
+SPOF-2 (contención en reserva
+es la contramedida
+de franja)
+funcional al SPOF-2.
+
+RF04 RNF04, RNF05, RNF07
+
+SPOF-3 (Stub tributario /
+thread exhaustion)
+
+El timeout y el Circuit
+Breaker mitigan
+directamente el SPOF-3.
+
+RF05 RNF09, RNF10
+
+-
+
+La idempotencia sostiene
+la reproducibilidad de las
+pruebas de carga.
+
+RF06 RNF05
+
+SPOF-4 (broker de mensajes)
+
+El patrón Outbox (ADR-03)
+es la mitigación directa del
+SPOF-4.
+
+RF07 RNF06
+
+SPOF-1 (contención
+OLTP/OLAP en PostgreSQL
+primaria)
+
+La réplica de lectura
+(ADR-02) es la mitigación
+directa del SPOF-1.
+
+SPOF-3
+
+Permite reproducir y
+verificar la resiliencia sin
+redesplegar.
+
+RF08 RNF05, RNF07
+
+5. D. Puntos únicos de falla (SPOF) y decisiones de arquitectura (ADR)
+5.1 Inventario de puntos de falla, cuellos de botella y degradaciones
+Se distingue explícitamente un punto único de falla (SPOF, detiene una función crítica sin redundancia) de un
+cuello de botella (limita capacidad bajo carga sin detener el sistema) y de una degradación controlada (pérdida
+de calidad de servicio aceptable y esperada). También se incorporan los componentes de la propia arquitectura
+de referencia que la versión anterior no analizaba: API Gateway, Balanceador, Redis y la Réplica de lectura.
+
+ID
+
+Impacto / Prob. /
+Familia
+Radio
+
+Componente
+
+Tipo y descripción
+
+PostgreSQL
+Primaria
+(escritura) y
+su pool de
+conexiones
+
+Punto único de falla real:
+si la primaria cae o el
+pool se agota, toda la
+confirmación de órdenes
+colapsa (no hay
+redundancia de
+escritura).
+
+Alto / Media /
+Total (bloquea el
+100% de las
+confirmaciones)
+
+B - Fallas
+de
+infraestru
+ctura de
+datos
+
+ADR-02 (replica de
+lectura separa OLAP) +
+PgBouncer (pool
+gestionado);
+redundancia de
+escritura queda fuera
+del alcance del
+semestre
+
+Reserva
+concurrente
+de franja
+CEDI
+
+No es un SPOF puro sino
+un cuello de botella de
+contención: un cerrojo
+mal diseñado no detiene
+el sistema completo, pero
+puede paralizar los hilos
+que compiten por la
+misma fila, degradando la
+capacidad de confirmar
+cualquier orden.
+
+Alto / Alta /
+Parcial (afecta las
+órdenes
+concurrentes
+sobre la misma
+franja, no todo el
+sistema)
+
+C - Fallas
+de
+software/
+concurren
+cia
+
+ADR-05 (bloqueo
+pesimista acotado en el
+tiempo o cerrojo
+distribuido en Redis
+con TTL)
+
+Stub externo
+de validación
+tributaria
+(dependenci
+a lenta)
+
+Punto único de falla por
+dependencia externa: sus
+latencias altas consumen
+los pools de hilos del
+backend (thread
+exhaustion) si no hay
+aislamiento, degradando
+todo el sistema aunque el
+Stub mismo no sea parte
+de la infraestructura
+propia.
+
+Alto / Alta / Total
+si no hay Circuit
+Breaker (arrastra
+a toda la
+aplicación)
+
+D - Fallas
+de
+ADR-04 (Circuit Breaker
+dependen + Bulkhead aislado,
+cias
+timeout 1.5 s)
+externas
+
+SPOF-4
+
+Broker de
+mensajes
+(Kafka/Rabbi
+tMQ)
+
+Punto único de falla para
+la entrega de eventos: si
+el broker se interrumpe,
+se pueden perder
+eventos de confirmación
+si no existe un patrón
+Outbox transaccional.
+
+Medio / Media /
+Parcial (no
+bloquea la
+confirmación,
+pero rompe la
+consistencia de
+eventos aguas
+abajo)
+
+B - Fallas
+de
+infraestru ADR-03 (Transactional
+ctura de
+Outbox)
+mensajerí
+a
+
+SPOF-5
+
+API Gateway
+/
+Balanceador
+de carga
+
+Punto único de falla de
+entrada: si se despliega
+una única instancia del
+Gateway o del
+
+Alto / Baja
+(componentes
+estándar, pero
+con bajo esfuerzo
+
+A - Fallas
+de
+infraestru
+ctura de
+
+SPOF-1
+
+SPOF-2
+
+SPOF-3
+
+Mitigación (ADR)
+
+Desplegar Gateway y
+balanceador en modo
+activo-pasivo o con
+múltiples réplicas
+
+ID
+
+SPOF-6
+
+SPOF-7
+
+Componente
+
+Tipo y descripción
+
+(instancia
+única de
+cada uno en
+el diagrama)
+
+balanceador, su caída
+bloquea el 100% del
+tráfico aunque los app
+servers estén sanos. No
+analizado en la versión
+anterior del documento.
+
+Impacto / Prob. /
+Familia
+Radio
+
+Mitigación (ADR)
+
+de redundancia)
+/ Total
+
+red/entra
+da
+
+detrás de un DNS/VIP;
+queda como trabajo
+futuro si el semestre no
+alcanza
+
+Redis (cache)
+
+No es SPOF sino
+degradación controlada
+esperada: si Redis cae, el
+sistema debe seguir
+funcionando leyendo
+directo de PostgreSQL
+(cache-aside), a costa de
+mayor latencia y carga
+sobre la primaria/réplica.
+Se documenta para evitar
+que el equipo lo trate
+como bloqueante.
+
+Bajo / Media /
+Parcial (solo
+degrada latencia,
+no bloquea)
+
+C - Fallas
+de
+software/
+cache
+
+Cache-aside con
+fallback a base de
+datos; alerta si la tasa
+de miss supera un
+umbral
+
+Réplica de
+lectura de
+PostgreSQL
+
+Cuello de botella, no
+SPOF: si la réplica cae o
+se atrasa, las consultas
+OTIF pueden degradarse
+o servirse con datos
+desactualizados, pero no
+debe bloquear la
+confirmación de órdenes
+(que usa la primaria).
+
+Medio / Baja /
+Parcial (afecta
+solo lecturas
+analiticas)
+
+B - Fallas
+de
+infraestru
+ctura de
+datos
+
+Alertar por lag de
+replicación (RNF06) y
+degradar a 'datos con
+antigüedad X' en vez de
+fallar
+
+Nota sobre la clasificación por familias: se adopta una taxonomía de cuatro familias (A: infraestructura de
+red/entrada, B: infraestructura de cómputo/datos/mensajería, C: software y concurrencia propia, D:
+dependencias externas) como supuesto de trabajo del equipo, a falta de que el catálogo A/B/C/D específico del
+curso haya sido publicado al momento de este entregable; se ajustará la etiqueta de cada SPOF si el catálogo
+oficial define categorías distintas.
+5.2 Decisiones de arquitectura (ADR)
+Cada ADR ahora declara la alternativa que se consideró y se descartó, con su razón, y las consecuencias o
+trade-offs de la decisión tomada -no solo el beneficio-, incluyendo el caso de ADR-05, cuyo propio trade-off es
+el mecanismo que genera el SPOF-2 que busca mitigar.
+
+Decisión
+
+Justificación
+(beneficio)
+
+Adoptar un
+monolito con 4
+módulos bien
+delimitados y
+esquemas de
+BD separados.
+
+Alternativa descartada:
+Reduce la
+microservicios desde el
+complejidad
+inicio (Cluster API/K8s
+operativa inicial
+completo). Se descarta
+y asegura que la
+por el costo operativo y
+separación en
+de coordinación que no
+microservicios
+se justifica sin evidencia
+sea guiada por
+de contención real en un
+métricas reales.
+semestre.
+
+El monolito acopla el ciclo
+de despliegue de los 4
+módulos: un cambio en
+Catálogo obliga a
+redesplegar todo el
+sistema, lo que puede
+aumentar el riesgo
+operativo frente a
+microservicios
+independientes.
+
+Separació
+n de
+lectura y
+escritura
+(CQRS
+ligero)
+
+Implementar
+una réplica de
+lectura en
+PostgreSQL
+dedicada a
+analitica (OTIF).
+
+Evita que las
+consultas
+pesadas sobre
+24 meses
+bloqueen las
+escrituras
+transaccionales
+de órdenes.
+
+Alternativa descartada:
+usar un almacen analitico
+separado (data
+warehouse/OLAP
+dedicado). Se descarta
+por el esfuerzo de ETL
+adicional, fuera del
+alcance de un semestre.
+
+La réplica introduce lag de
+replicación (RNF06): los
+indicadores OTIF pueden
+mostrar datos con hasta 5
+minutos de antigüedad, lo
+que debe comunicarse al
+Analista de Retail.
+
+ADR-03
+
+Patron
+Transacti
+onal
+Outbox
+
+Guardar el
+evento
+OrdenConfirma
+da en la misma
+transacción de
+la BD y un
+worker lo envía
+al broker.
+
+Previene la
+pérdida de
+eventos cuando
+el broker de
+mensajes
+presenta caídas
+o latencia.
+
+Alternativa descartada:
+publicar el evento
+directamente desde el
+service tras el commit
+(dual write). Se descarta
+porque no garantiza la
+atomicidad entre la
+escritura en BD y la
+publicación.
+
+Agrega latencia de
+publicación (el evento no
+es instantáneo, depende
+del polling/CDC del
+worker) y una tabla
+adicional que debe
+purgarse periódicamente.
+
+ADR-04
+
+Implementar
+Resilienci Circuit Breaker
+a para la
+(Resilience4j/G
+dependen obreaker) y
+cia
+Bulkhead
+externa
+aislado para el
+Stub Tributario.
+
+Aísla los fallos
+de la
+dependencia
+lenta para
+evitar la
+inanición del
+pool principal
+de peticiones.
+
+Alternativa descartada:
+reintentos simples con
+backoff sin Circuit
+Breaker. Se descarta
+porque bajo una caída
+sostenida del Stub, los
+reintentos agravarían el
+thread exhaustion en vez
+de evitarlo.
+
+El Circuit Breaker puede
+rechazar solicitudes
+legítimas mientras está
+abierto (falsos negativos),
+lo que exige comunicar al
+proveedor un estado
+'pendiente de validación'
+en vez de un rechazo
+definitivo.
+
+ADR-05
+
+Utilizar
+Control
+Pessimistic
+concurren
+Locking (SELECT
+te en la
+FOR UPDATE)
+reserva
+acotado en el
+
+Garantiza cero
+sobreventas en
+la asignación
+física de citas en
+el CEDI.
+
+Alternativa descartada:
+Optimistic Locking
+(versión/timestamp con
+reintento). Se descarta
+como opción inicial
+
+El bloqueo pesimista
+introduce exactamente el
+tipo de contención que
+advierte el SPOF-2: bajo
+alta concurrencia sobre la
+
+ADR
+
+ADR-01
+
+ADR-02
+
+Título
+
+Arquitect
+ura inicial
+de
+monolito
+modular
+
+Alternativas descartadas
+
+Consecuencias /
+trade-offs
+
+ADR
+
+Título
+
+Decisión
+
+de franjas
+CEDI
+
+tiempo, con
+opción de
+migrar a
+cerrojos
+distribuidos en
+Redis si la
+contención lo
+exige.
+
+Justificación
+(beneficio)
+
+Alternativas descartadas
+porque bajo alta
+contención sobre una
+franja popular generaría
+una tasa alta de
+reintentos fallidos,
+empeorando la
+experiencia del
+proveedor; queda como
+alternativa a evaluar en
+la Entrega 2 con datos
+reales.
+
+Consecuencias /
+trade-offs
+misma franja, los hilos que
+esperan el lock pueden
+acumularse. Se mitiga
+acotando el tiempo de
+espera del lock y
+devolviendo error de
+'franja en disputa' en vez
+de bloquear
+indefinidamente.
+
+6. E. Diagrama C4 (Context, Container, Component)
+Leyenda de notación: las cajas azul oscuro representan personas, azul medio representa el sistema o sus
+contenedores, gris representa sistemas externos, verde representa almacenes de datos, morado representa
+mensajeria/eventos, y dorado representa observabilidad e inyección de fallas. El texto entre corchetes indica el
+tipo C4 y, cuando aplica, la tecnología concreta. Las flechas punteadas representan relaciones de soporte
+(observabilidad, verificación de CI, inyección de fallas); las flechas sólidas representan flujo de datos o
+llamadas.
+6.1 Nivel 1 - Contexto
+
+Figura 3. Diagrama de contexto (Nivel 1) con los tres actores humanos y el sistema externo.
+6.2 Nivel 2 - Contenedores
+
+Figura 4. Diagrama de contenedores (Nivel 2).
+
+6.3 Nivel 3 - Componentes
+
+Figura 5. Diagrama de componentes (Nivel 3), con los pasos del flujo numerados y las fronteras de esquema.
+7. F. Diagrama de arquitectura de referencia de la solución
+
+Figura 6. Diagrama de arquitectura de referencia de la solución.
+
+7.1 Componentes desplegables
+Zona
+
+Componentes
+
+Traffic Ingress
+
+k6/Gatling (generador de carga con RPS objetivo declarado); API Gateway (rate
+limiting, autenticacion, inyeccion de trace-id); Balanceador de carga (HAProxy/Nginx,
+least-conn); Pipeline de CI (ArchUnit/Modulith/Packwerk, verifica fronteras entre
+módulos antes de cada despliegue).
+
+Application Layer
+
+Cluster de 3 instancias del backend monolito modular (app.1, app.2, app.3).
+
+Persistence &
+Messaging
+
+PostgreSQL primaria (fuente de verdad, pool PgBouncer); réplica de lectura dedicada
+a OTIF/Fill Rate (lag tolerado <= 5 min); Redis (cache-aside con invalidación activa
+on-write, PostgreSQL es la fuente de verdad); Kafka/RabbitMQ (broker); Outbox
+Publisher (worker del patron Outbox).
+
+Dependencia externa
+
+Stub Tributario/Crédito, con latencia y tasa de error configurables vía faults.yaml
+(timeout de 1.5 s desde la aplicación, con Circuit Breaker y Bulkhead).
+
+Observabilidad &
+Chaos
+
+OTel Collector, Prometheus (métricas RED/USE), Jaeger (trazas), Grafana (tablero
+p50/p95/p99), Motor de Fallas (faults.yaml recargable, kill switch por endpoint
+admin).
+
+

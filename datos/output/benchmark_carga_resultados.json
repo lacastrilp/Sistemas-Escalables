@@ -1,0 +1,22 @@
+{
+  "COPY masivo": {
+    "filas": 300137,
+    "tiempo_seg": 7.858,
+    "filas_por_seg": 38195.0
+  },
+  "INSERT por lotes (1,000)": {
+    "filas": 300137,
+    "tiempo_seg": 17.965,
+    "filas_por_seg": 16707.0
+  },
+  "INSERT fila por fila (autocommit)": {
+    "filas": 300137,
+    "tiempo_seg": 374.912,
+    "filas_por_seg": 801.0
+  },
+  "Ruta transaccional de aplicación": {
+    "filas": 300137,
+    "tiempo_seg": 223.602,
+    "filas_por_seg": 1342.0
+  }
+}
