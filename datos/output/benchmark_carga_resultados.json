@@ -1,22 +1,22 @@
 {
   "COPY masivo": {
     "filas": 300137,
-    "tiempo_seg": 7.858,
-    "filas_por_seg": 38195.0
+    "tiempo_seg": 12.265,
+    "filas_por_seg": 24471.0
   },
   "INSERT por lotes (1,000)": {
     "filas": 300137,
-    "tiempo_seg": 17.965,
-    "filas_por_seg": 16707.0
+    "tiempo_seg": 19.182,
+    "filas_por_seg": 15647.0
   },
   "INSERT fila por fila (autocommit)": {
     "filas": 300137,
-    "tiempo_seg": 374.912,
-    "filas_por_seg": 801.0
+    "tiempo_seg": 916.712,
+    "filas_por_seg": 327.0
   },
   "Ruta transaccional de aplicación": {
     "filas": 300137,
-    "tiempo_seg": 223.602,
-    "filas_por_seg": 1342.0
+    "tiempo_seg": 276.907,
+    "filas_por_seg": 1084.0
   }
 }
