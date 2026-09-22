@@ -1,7 +1,8 @@
 # Informe Técnico: Entregable 2 — Escalabilidad de los Datos
 **Universidad EAFIT · Aplicaciones y Sistemas Escalables**  
 **Proyecto Integrador: Portal B2B de Proveedores de Retail**  
-**Equipo / Integrantes:** Sara Lopez Marin / Luis Alejandro Castrillon Pulgarin (Grupo EKS)  
+**Equipo / Integrantes:** Sara Lopez Marin / Luis Alejandro Castrillon Pulgarin (Grupo EKS) 
+**Link repositorio:**  https://github.com/lacastrilp/Sistemas-Escalables/tree/main 
 **Fecha:** 21 de septiembre de 2026  
 
 ---
