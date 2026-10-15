@@ -1,22 +1,26 @@
 {
   "COPY masivo": {
-    "filas": 300137,
-    "tiempo_seg": 12.265,
-    "filas_por_seg": 24471.0
+    "filas": 351428,
+    "tiempo_seg": 9.42,
+    "filas_por_seg": 37306.0,
+    "mecanismo": "Protocolo streaming binario/CSV sin WAL síncrono por fila"
   },
   "INSERT por lotes (1,000)": {
-    "filas": 300137,
-    "tiempo_seg": 19.182,
-    "filas_por_seg": 15647.0
+    "filas": 351428,
+    "tiempo_seg": 22.255,
+    "filas_por_seg": 15791.0,
+    "mecanismo": "execute_values agrupado en transacciones explícitas de 1.000 tuplas"
   },
   "INSERT fila por fila (autocommit)": {
-    "filas": 300137,
-    "tiempo_seg": 916.712,
-    "filas_por_seg": 327.0
+    "filas": 351428,
+    "tiempo_seg": 363.44,
+    "filas_por_seg": 967.0,
+    "mecanismo": "El anti-patrón: 1 round-trip de red y fsync WAL individual por cada fila"
   },
   "Ruta transaccional de aplicación": {
-    "filas": 300137,
-    "tiempo_seg": 276.907,
-    "filas_por_seg": 1084.0
+    "filas": 351428,
+    "tiempo_seg": 159.32,
+    "filas_por_seg": 2206.0,
+    "mecanismo": "Validaciones de contrato, franja y SKU agrupadas en transacción de negocio"
   }
 }

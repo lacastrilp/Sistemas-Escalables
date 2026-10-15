@@ -1,0 +1,68 @@
+networks:
+  pgcluster:
+    driver: bridge
+
+services:
+  pg-primary:
+    image: postgres:16
+    container_name: pg-primary
+    hostname: pg-primary
+    networks: [pgcluster]
+    environment:
+      POSTGRES_USER: eafit
+      POSTGRES_PASSWORD: eafit2026
+      POSTGRES_DB: taller_cluster
+    volumes:
+      - ./primary/init-replication.sql:/docker-entrypoint-initdb.d/10-init-replication.sql:ro
+      - ./primary/init-pg-hba.sh:/docker-entrypoint-initdb.d/20-init-pg-hba.sh:ro
+      - pg_primary_data:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c listen_addresses=*
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    ports:
+      - "5543:5432"
+
+  pg-replica1:
+    build:
+      context: ./replica
+    container_name: pg-replica1
+    hostname: pg-replica1
+    networks: [pgcluster]
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      PRIMARY_HOST: pg-primary
+      REPL_USER: replicador
+      REPL_PASSWORD: replica2026
+      REPL_SLOT: slot_replica1
+    volumes:
+      - pg_replica1_data:/var/lib/postgresql/data
+    depends_on: [pg-primary]
+    ports:
+      - "5544:5432"
+
+  pg-replica2:
+    build:
+      context: ./replica
+    container_name: pg-replica2
+    hostname: pg-replica2
+    networks: [pgcluster]
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      PRIMARY_HOST: pg-primary
+      REPL_USER: replicador
+      REPL_PASSWORD: replica2026
+      REPL_SLOT: slot_replica2
+    volumes:
+      - pg_replica2_data:/var/lib/postgresql/data
+    depends_on: [pg-primary]
+    ports:
+      - "5545:5432"
+
+volumes:
+  pg_primary_data:
+  pg_replica1_data:
+  pg_replica2_data:

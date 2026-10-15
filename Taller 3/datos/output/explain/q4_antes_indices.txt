@@ -1,0 +1,57 @@
+GroupAggregate  (cost=73385.35..99495.88 rows=30820 width=112) (actual time=269.442..339.425 rows=24 loops=1)
+  Output: o.proveedor_id, (date_trunc('month'::text, o.fecha_orden)), count(DISTINCT o.id), count(DISTINCT CASE WHEN (((o.estado)::text = 'ENTREGADA'::text) AND (o.fecha_entrega IS NOT NULL) AND (o.fecha_compromiso_entrega IS NOT NULL) AND (o.fecha_entrega <= o.fecha_compromiso_entrega)) THEN o.id ELSE NULL::bigint END), round((((count(DISTINCT CASE WHEN (((o.estado)::text = 'ENTREGADA'::text) AND (o.fecha_entrega IS NOT NULL) AND (o.fecha_compromiso_entrega IS NOT NULL) AND (o.fecha_entrega <= o.fecha_compromiso_entrega)) THEN o.id ELSE NULL::bigint END))::numeric / (NULLIF(count(DISTINCT o.id), 0))::numeric) * '100'::numeric), 2), COALESCE(sum(l.cantidad_recibida), '0'::bigint), COALESCE(sum(l.cantidad), '0'::bigint), round((((COALESCE(sum(l.cantidad_recibida), '0'::bigint))::numeric / (NULLIF(COALESCE(sum(l.cantidad), '0'::bigint), 0))::numeric) * '100'::numeric), 2)
+  Group Key: (date_trunc('month'::text, o.fecha_orden))
+  Buffers: shared hit=5480 read=38294, temp read=1380 written=1383
+  ->  Gather Merge  (cost=73385.35..94946.32 rows=185126 width=50) (actual time=266.563..303.494 rows=184691 loops=1)
+        Output: (date_trunc('month'::text, o.fecha_orden)), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=5480 read=38294, temp read=1380 written=1383
+        ->  Sort  (cost=72385.32..72578.16 rows=77136 width=50) (actual time=262.805..268.986 rows=61564 loops=3)
+              Output: (date_trunc('month'::text, o.fecha_orden)), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+              Sort Key: (date_trunc('month'::text, o.fecha_orden)), o.id
+              Sort Method: external merge  Disk: 3704kB
+              Buffers: shared hit=5480 read=38294, temp read=1380 written=1383
+              Worker 0:  actual time=261.697..268.188 rows=61310 loops=1
+                Sort Method: external merge  Disk: 3664kB
+                Buffers: shared hit=1674 read=12572, temp read=458 written=459
+              Worker 1:  actual time=261.631..267.718 rows=61448 loops=1
+                Sort Method: external merge  Disk: 3672kB
+                Buffers: shared hit=1676 read=12506, temp read=459 written=460
+              ->  Parallel Hash Join  (cost=13533.17..63484.76 rows=77136 width=50) (actual time=26.915..225.585 rows=61564 loops=3)
+                    Output: date_trunc('month'::text, o.fecha_orden), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+                    Inner Unique: true
+                    Hash Cond: (l.orden_id = o.id)
+                    Buffers: shared hit=5392 read=38294
+                    Worker 0:  actual time=25.366..223.536 rows=61310 loops=1
+                      Buffers: shared hit=1630 read=12572
+                    Worker 1:  actual time=25.389..223.035 rows=61448 loops=1
+                      Buffers: shared hit=1632 read=12506
+                    ->  Parallel Seq Scan on ordenes.linea_orden l  (cost=0.00..46459.92 rows=1256692 width=16) (actual time=0.031..85.709 rows=1005347 loops=3)
+                          Output: l.id, l.orden_id, l.numero_linea, l.sku_id, l.cantidad, l.precio_unitario, l.cantidad_recibida, l.fecha_recepcion
+                          Buffers: shared hit=216 read=33677
+                          Worker 0:  actual time=0.040..85.505 rows=1002716 loops=1
+                            Buffers: shared hit=68 read=11201
+                          Worker 1:  actual time=0.034..85.207 rows=994693 loops=1
+                            Buffers: shared hit=70 read=11108
+                    ->  Parallel Hash  (cost=13372.04..13372.04 rows=12890 width=42) (actual time=26.546..26.547 rows=10248 loops=3)
+                          Output: o.proveedor_id, o.fecha_orden, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega
+                          Buckets: 32768  Batches: 1  Memory Usage: 2624kB
+                          Buffers: shared hit=5080 read=4617
+                          Worker 0:  actual time=25.059..25.060 rows=9161 loops=1
+                            Buffers: shared hit=1514 read=1371
+                          Worker 1:  actual time=25.089..25.090 rows=9149 loops=1
+                            Buffers: shared hit=1514 read=1398
+                          ->  Parallel Seq Scan on ordenes.orden_compra o  (cost=0.00..13372.04 rows=12890 width=42) (actual time=0.025..23.175 rows=10248 loops=3)
+                                Output: o.proveedor_id, o.fecha_orden, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega
+                                Filter: ((o.fecha_orden >= '2024-01-01 00:00:00'::timestamp without time zone) AND (o.fecha_orden <= '2025-12-31 00:00:00'::timestamp without time zone) AND (o.proveedor_id = 1))
+                                Rows Removed by Filter: 157754
+                                Buffers: shared hit=5080 read=4617
+                                Worker 0:  actual time=0.021..22.093 rows=9161 loops=1
+                                  Buffers: shared hit=1514 read=1371
+                                Worker 1:  actual time=0.038..22.144 rows=9149 loops=1
+                                  Buffers: shared hit=1514 read=1398
+Planning:
+  Buffers: shared hit=188 read=6 dirtied=1
+Planning Time: 0.729 ms
+Execution Time: 340.084 ms

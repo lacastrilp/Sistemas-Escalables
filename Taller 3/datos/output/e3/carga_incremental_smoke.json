@@ -1,0 +1,21 @@
+{
+  "fase": "smoke",
+  "timestamp": "2026-10-12T23:13:46.337054",
+  "intentos": 200,
+  "workers": 4,
+  "pool_max": 10,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 138,
+  "rechazos": {
+    "sin_contrato": 62
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 33.214,
+  "tx_p95_ms": 65.816,
+  "tx_p99_ms": 75.643,
+  "duracion_s": 1.74,
+  "throughput_tps": 114.7
+}

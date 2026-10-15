@@ -1,0 +1,51 @@
+GroupAggregate  (cost=69566.40..94559.24 rows=29496 width=112) (actual time=156.466..227.246 rows=24 loops=1)
+  Output: o.proveedor_id, (date_trunc('month'::text, o.fecha_orden)), count(DISTINCT o.id), count(DISTINCT CASE WHEN (((o.estado)::text = 'ENTREGADA'::text) AND (o.fecha_entrega IS NOT NULL) AND (o.fecha_compromiso_entrega IS NOT NULL) AND (o.fecha_entrega <= o.fecha_compromiso_entrega)) THEN o.id ELSE NULL::bigint END), round((((count(DISTINCT CASE WHEN (((o.estado)::text = 'ENTREGADA'::text) AND (o.fecha_entrega IS NOT NULL) AND (o.fecha_compromiso_entrega IS NOT NULL) AND (o.fecha_entrega <= o.fecha_compromiso_entrega)) THEN o.id ELSE NULL::bigint END))::numeric / (NULLIF(count(DISTINCT o.id), 0))::numeric) * '100'::numeric), 2), COALESCE(sum(l.cantidad_recibida), '0'::bigint), COALESCE(sum(l.cantidad), '0'::bigint), round((((COALESCE(sum(l.cantidad_recibida), '0'::bigint))::numeric / (NULLIF(COALESCE(sum(l.cantidad), '0'::bigint), 0))::numeric) * '100'::numeric), 2)
+  Group Key: (date_trunc('month'::text, o.fecha_orden))
+  Buffers: shared hit=100821 read=33334 written=4393, temp read=1380 written=1383
+  ->  Gather Merge  (cost=69566.40..90204.61 rows=177203 width=50) (actual time=153.560..191.445 rows=184691 loops=1)
+        Output: (date_trunc('month'::text, o.fecha_orden)), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=100821 read=33334 written=4393, temp read=1380 written=1383
+        ->  Sort  (cost=68566.38..68750.97 rows=73835 width=50) (actual time=148.906..155.086 rows=61564 loops=3)
+              Output: (date_trunc('month'::text, o.fecha_orden)), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+              Sort Key: (date_trunc('month'::text, o.fecha_orden)), o.id
+              Sort Method: external merge  Disk: 4064kB
+              Buffers: shared hit=100821 read=33334 written=4393, temp read=1380 written=1383
+              Worker 0:  actual time=147.699..153.929 rows=60061 loops=1
+                Sort Method: external merge  Disk: 3592kB
+                Buffers: shared hit=32900 read=10797 written=1320, temp read=449 written=450
+              Worker 1:  actual time=145.706..151.684 rows=56626 loops=1
+                Sort Method: external merge  Disk: 3384kB
+                Buffers: shared hit=31043 read=10112 written=1285, temp read=423 written=424
+              ->  Nested Loop  (cost=838.41..60069.07 rows=73835 width=50) (actual time=3.424..110.551 rows=61564 loops=3)
+                    Output: date_trunc('month'::text, o.fecha_orden), o.proveedor_id, o.id, o.estado, o.fecha_entrega, o.fecha_compromiso_entrega, l.cantidad_recibida, l.cantidad
+                    Buffers: shared hit=100791 read=33334 written=4393
+                    Worker 0:  actual time=2.314..108.850 rows=60061 loops=1
+                      Buffers: shared hit=32885 read=10797 written=1320
+                    Worker 1:  actual time=1.753..108.208 rows=56626 loops=1
+                      Buffers: shared hit=31028 read=10112 written=1285
+                    ->  Parallel Bitmap Heap Scan on ordenes.orden_compra o  (cost=837.98..10750.90 rows=12338 width=42) (actual time=3.386..21.969 rows=10248 loops=3)
+                          Output: o.id, o.numero_orden, o.proveedor_id, o.fecha_orden, o.estado, o.cedi_id, o.franja_id, o.total, o.fecha_compromiso_entrega, o.fecha_entrega, o.fecha_confirmacion, o.idempotency_key, o.created_at
+                          Recheck Cond: ((o.proveedor_id = 1) AND (o.fecha_orden >= '2024-01-01 00:00:00'::timestamp without time zone) AND (o.fecha_orden <= '2025-12-31 00:00:00'::timestamp without time zone))
+                          Heap Blocks: exact=3400
+                          Buffers: shared hit=1294 read=8063 written=1040
+                          Worker 0:  actual time=2.263..21.088 rows=10030 loops=1
+                            Buffers: shared hit=396 read=2597 written=329
+                          Worker 1:  actual time=1.716..20.790 rows=9431 loops=1
+                            Buffers: shared hit=264 read=2580 written=294
+                          ->  Bitmap Index Scan on idx_orden_proveedor_fecha  (cost=0.00..830.57 rows=29612 width=0) (actual time=4.320..4.321 rows=30745 loops=1)
+                                Index Cond: ((o.proveedor_id = 1) AND (o.fecha_orden >= '2024-01-01 00:00:00'::timestamp without time zone) AND (o.fecha_orden <= '2025-12-31 00:00:00'::timestamp without time zone))
+                                Buffers: shared hit=120
+                    ->  Index Scan using idx_linea_orden on ordenes.linea_orden l  (cost=0.43..3.90 rows=8 width=16) (actual time=0.006..0.007 rows=6 loops=30745)
+                          Output: l.id, l.orden_id, l.numero_linea, l.sku_id, l.cantidad, l.precio_unitario, l.cantidad_recibida, l.fecha_recepcion
+                          Index Cond: (l.orden_id = o.id)
+                          Buffers: shared hit=99497 read=25271 written=3353
+                          Worker 0:  actual time=0.006..0.007 rows=6 loops=10030
+                            Buffers: shared hit=32489 read=8200 written=991
+                          Worker 1:  actual time=0.006..0.007 rows=6 loops=9431
+                            Buffers: shared hit=30764 read=7532 written=991
+Planning:
+  Buffers: shared hit=68 read=6
+Planning Time: 0.518 ms
+Execution Time: 227.912 ms

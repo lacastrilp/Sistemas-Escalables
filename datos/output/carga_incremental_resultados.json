@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-10-11T23:42:25.822121",
+  "intentos_totales": 5000,
+  "ordenes_aceptadas": 4006,
+  "ordenes_rechazadas": 994,
+  "motivos_rechazo": {
+    "sin_contrato_activo": 310,
+    "franja_agotada": 684,
+    "sku_fuera_catalogo": 0
+  },
+  "lineas_insertadas": 16041,
+  "eventos_emitidos": 4006,
+  "filas_totales_bd": 24053,
+  "tiempo_total_seg": 14.62,
+  "ordenes_por_seg": 342.0,
+  "filas_por_seg": 1645.0,
+  "sobreventa_franjas": 0,
+  "estado": "PASA"
+}

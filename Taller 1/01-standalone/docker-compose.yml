@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg_taller
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eafit
+      POSTGRES_PASSWORD: eafit2026
+      POSTGRES_DB: taller_indices
+    ports:
+      - "5542:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    shm_size: '1gb'
+
+volumes:
+  pgdata:

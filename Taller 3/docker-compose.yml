@@ -1,0 +1,106 @@
+# ============================================================
+# PORTAL B2B RETAIL - E2 (datos) + E3 (laboratorio de fallas)
+# El servicio postgres y su volumen NO cambian: se conservan
+# los 5.66M de filas cargadas en el E2.
+#
+# Rutas de conexión desde la app Python (host):
+#   - Directa  (línea base E2): 127.0.0.1:5435 o socket datos/.pg_socket
+#   - Caótica  (vía Toxiproxy): 127.0.0.1:25432  -> postgres:5432
+# ============================================================
+services:
+  postgres:
+    image: postgres:16
+    container_name: entregable2-postgres
+    environment:
+      POSTGRES_DB: retail
+      POSTGRES_USER: retail
+      POSTGRES_PASSWORD: retail
+    # Familia 3: max_connections bajo-moderado y estadísticas de locks
+    command: >
+      postgres
+      -c max_connections=100
+      -c shared_preload_libraries=pg_stat_statements
+      -c log_lock_waits=on
+      -c deadlock_timeout=200ms
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retail -d retail"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./datos/.pg_socket:/var/run/postgresql
+    networks: [retail]
+
+  # ---------------- Familia 1: Red / Infraestructura ----------------
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: e3-toxiproxy
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    ports:
+      - "8474:8474"     # API REST de control (toxics en caliente)
+      - "25432:25432"   # Proxy hacia PostgreSQL
+    volumes:
+      - ./observabilidad/toxiproxy/toxiproxy.json:/config/toxiproxy.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [retail]
+
+  # ---------------- Trazas distribuidas (OTLP) ----------------
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: e3-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+      - "14269:14269"   # métricas internas de Jaeger
+    networks: [retail]
+
+  # ---------------- Métricas temporales ----------------
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: e3-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # scrape del exporter Python en el host
+    volumes:
+      - ./observabilidad/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks: [retail]
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: e3-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./observabilidad/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on: [prometheus, jaeger]
+    networks: [retail]
+
+networks:
+  retail:
+    name: retail-e3
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

@@ -1,0 +1,41 @@
+{
+  "fallas_activas": false,
+  "_comentario": "Kill switch maestro. Si es false, NINGUNA familia se aplica aunque su 'enabled' sea true. Se recarga en caliente cada 2 s.",
+
+  "red": {
+    "enabled": false,
+    "tipo": "latency",
+    "latencia_ms": 150,
+    "jitter_ms": 10,
+    "bandwidth_kbps": 64,
+    "direccion": "downstream"
+  },
+
+  "dependencia_catalogo": {
+    "enabled": false,
+    "probabilidad_fallo": 1.0,
+    "timeout_simulado_ms": 2000,
+    "circuit_breaker": {
+      "enabled": false,
+      "umbral_fallos": 5,
+      "ventana_reset_s": 10,
+      "llamadas_half_open": 1
+    }
+  },
+
+  "pool_conexiones": {
+    "enabled": false,
+    "pool_max": 5,
+    "zombies": 4,
+    "zombie_sleep_s": 30,
+    "timeout_adquisicion_s": 1.0
+  },
+
+  "estado_datos": {
+    "enabled": false,
+    "probabilidad_error_transitorio": 0.2,
+    "bloqueadores_concurrentes": 3,
+    "lock_sleep_s": 5,
+    "lock_timeout_app_ms": 500
+  }
+}

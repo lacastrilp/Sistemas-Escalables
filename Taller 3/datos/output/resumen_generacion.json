@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-10-11T23:32:56.808809",
+  "semilla": 42,
+  "zipf_s": 0.95,
+  "as_of": "2025-12-31T12:00:00",
+  "tiempo_generacion_seg": 32.91,
+  "volumenes": {
+    "proveedores": 100000,
+    "contratos": 15000,
+    "skus": 400000,
+    "ordenes": 500000,
+    "lineas": 3000000,
+    "franjas": 150000,
+    "eventos": 800000,
+    "cedis": 10
+  },
+  "casos_borde": {
+    "caso_1_orden_300_lineas": {
+      "orden_id": 1,
+      "numero_orden": "ORD-000000001",
+      "lineas_esperadas": 300
+    },
+    "caso_2_contrato_vencido_ayer": {
+      "contrato_id": 1,
+      "proveedor_id": 1,
+      "fecha_fin": "2025-12-30 23:59:59"
+    },
+    "caso_3_contrato_vence_hoy_mediodia": {
+      "contrato_id": 2,
+      "proveedor_id": 2,
+      "fecha_fin": "2025-12-31 12:00:00"
+    },
+    "caso_4_ultima_franja_1_cupo": {
+      "franja_id": 150000,
+      "cedi_id": 1,
+      "fecha": "2025-12-31",
+      "capacidad": 10,
+      "reservados": 9
+    },
+    "caso_5_proveedor_sin_contrato": {
+      "proveedor_id": 20000,
+      "tiene_contrato": false
+    },
+    "caso_6_sku_fuera_catalogo": {
+      "orden_id": 1,
+      "numero_linea": 1,
+      "descripcion": "SKU no presente en catalogo negociado"
+    },
+    "caso_7_proveedor_hot": {
+      "proveedor_id": 1,
+      "ordenes_acumuladas": 30880
+    },
+    "caso_8_proveedor_sin_ordenes_mes": {
+      "proveedor_id": 410,
+      "mes_sin_ordenes": "2024-01"
+    }
+  },
+  "hashes_sha256": {
+    "cedi.csv": "e7be204d212a6adfbb22c0f57598392c58c2a0bc4dcec62ec885d240a0381bee",
+    "contratos.csv": "fb5b07f8ae884ee0f326be51b872f1f67cc249d9406d367f9aa2c3d2fb1822f9",
+    "eventos.csv": "ce8384771c5f35c265bb9c571e6de5cbef6fa26bcb9949e110e855e95d72e90c",
+    "franjas.csv": "926cae80a5e84d16fbd270a00b7875de54a12d48ae3d618d0554d4efccf4659a",
+    "lineas_orden.csv": "5f942a04ef3a3ad75b9d6985b4ec5d445b7b4bb805f68f97df00da6510601fae",
+    "ordenes.csv": "2150312cd3dad3c6f8c9ea963f87455992a4f4599c7659277776e0794bdc0418",
+    "proveedor_sku.csv": "0aafee6c146503c6e480c22971fe28f719e577258532d2ba79748fb746e1c6f8",
+    "proveedores.csv": "c85ed0db40cb648083ff9228e235be1e45d23061cc4a24d5ad4190f12af4086d",
+    "skus.csv": "061e14e945766bb63b7f82081f285e05b64c31aca6926594712a4ae48a06e5b0"
+  }
+}

@@ -10,7 +10,8 @@
 --    - ordenes (orden_compra, linea_orden, evento_auditoria)
 --    PROHIBIDO hacer JOINs entre tablas de diferentes esquemas.
 -- 2. Llaves primarias tipo BIGINT generadas secuencialmente/aritméticamente.
--- 3. Índices optimizados para las consultas patrón Q1 a Q5.
+-- 3. Índices secundarios se crean POST-CARGA en datos/sql/indices_secundarios.sql
+--    para maximizar la velocidad de COPY y permitir mediciones EXPLAIN antes/después.
 -- ============================================================
 
 DROP SCHEMA IF EXISTS ordenes CASCADE;
@@ -22,7 +23,6 @@ CREATE SCHEMA proveedores;
 CREATE SCHEMA catalogo;
 CREATE SCHEMA ordenes;
 CREATE SCHEMA logistica;
-
 
 
 -- ============================================================
@@ -49,8 +49,8 @@ CREATE TABLE proveedores.proveedor (
 CREATE TABLE proveedores.contrato_suministro (
     id                  BIGINT PRIMARY KEY,
     proveedor_id        BIGINT NOT NULL,
-    fecha_inicio        DATE NOT NULL,
-    fecha_fin           DATE NOT NULL,
+    fecha_inicio        TIMESTAMP NOT NULL,
+    fecha_fin           TIMESTAMP NOT NULL,
     estado              VARCHAR(20) NOT NULL,
     limite_credito      NUMERIC(14,2),
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -238,18 +238,19 @@ CREATE TABLE logistica.franja_descargue (
 -- ============================================================
 
 CREATE TABLE ordenes.orden_compra (
-    id                  BIGINT PRIMARY KEY,
-    numero_orden        VARCHAR(50) NOT NULL UNIQUE,
-    proveedor_id        BIGINT NOT NULL,
-    fecha_orden         TIMESTAMP NOT NULL,
-    estado              VARCHAR(30) NOT NULL,
-    cedi_id             BIGINT NOT NULL,
-    franja_id           BIGINT,
-    total               NUMERIC(16,2) NOT NULL DEFAULT 0,
-    fecha_entrega       DATE,
-    fecha_confirmacion  TIMESTAMP,
-    idempotency_key     VARCHAR(100),
-    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                         BIGINT PRIMARY KEY,
+    numero_orden               VARCHAR(50) NOT NULL UNIQUE,
+    proveedor_id               BIGINT NOT NULL,
+    fecha_orden                TIMESTAMP NOT NULL,
+    estado                     VARCHAR(30) NOT NULL,
+    cedi_id                    BIGINT NOT NULL,
+    franja_id                  BIGINT,
+    total                      NUMERIC(16,2) NOT NULL DEFAULT 0,
+    fecha_compromiso_entrega   DATE,
+    fecha_entrega              DATE,
+    fecha_confirmacion         TIMESTAMP,
+    idempotency_key            VARCHAR(100),
+    created_at                 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT orden_estado_ck
         CHECK (
@@ -363,68 +364,8 @@ CREATE TABLE ordenes.evento_auditoria (
         )
 );
 
-
 -- ============================================================
--- ÍNDICES
+-- NOTA: Los índices secundarios se crean post-carga mediante
+-- datos/sql/indices_secundarios.sql siguiendo las mejores prácticas
+-- de PostgreSQL y los requisitos de medición del Entregable 2.
 -- ============================================================
-
-CREATE INDEX idx_contrato_proveedor
-    ON proveedores.contrato_suministro(proveedor_id);
-
-CREATE INDEX idx_contrato_estado_fecha
-    ON proveedores.contrato_suministro(
-        estado,
-        fecha_inicio,
-        fecha_fin
-    );
-
-CREATE INDEX idx_proveedor_sku_proveedor
-    ON catalogo.proveedor_sku(proveedor_id);
-
-CREATE INDEX idx_proveedor_sku_sku
-    ON catalogo.proveedor_sku(sku_id);
-
-CREATE INDEX idx_proveedor_sku_estado
-    ON catalogo.proveedor_sku(
-        proveedor_id,
-        estado
-    );
-
-CREATE INDEX idx_orden_proveedor_fecha
-    ON ordenes.orden_compra(
-        proveedor_id,
-        fecha_orden
-    );
-
-CREATE INDEX idx_orden_fecha
-    ON ordenes.orden_compra(fecha_orden);
-
-CREATE INDEX idx_orden_cedi_fecha
-    ON ordenes.orden_compra(
-        cedi_id,
-        fecha_orden
-    );
-
-CREATE INDEX idx_orden_franja
-    ON ordenes.orden_compra(franja_id);
-
-CREATE INDEX idx_linea_orden
-    ON ordenes.linea_orden(orden_id);
-
-CREATE INDEX idx_linea_sku
-    ON ordenes.linea_orden(sku_id);
-
-CREATE INDEX idx_evento_orden_fecha
-    ON ordenes.evento_auditoria(
-        orden_id,
-        fecha_evento
-    );
-
-CREATE INDEX idx_evento_fecha
-    ON ordenes.evento_auditoria(fecha_evento);
-
-CREATE INDEX idx_franja_cedi_fecha
-    ON logistica.franja_descargue(
-        cedi_id,
-        fecha
-    );

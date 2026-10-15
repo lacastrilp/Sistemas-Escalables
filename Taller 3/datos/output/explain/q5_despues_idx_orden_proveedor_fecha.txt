@@ -1,0 +1,11 @@
+Limit  (cost=0.42..66.85 rows=50 width=51) (actual time=0.027..0.081 rows=50 loops=1)
+  Output: id, numero_orden, proveedor_id, fecha_orden, estado, total
+  Buffers: shared hit=52 read=1
+  ->  Index Scan Backward using idx_orden_proveedor_fecha on ordenes.orden_compra  (cost=0.42..39776.24 rows=29938 width=51) (actual time=0.026..0.076 rows=50 loops=1)
+        Output: id, numero_orden, proveedor_id, fecha_orden, estado, total
+        Index Cond: (orden_compra.proveedor_id = 1)
+        Buffers: shared hit=52 read=1
+Planning:
+  Buffers: shared hit=8
+Planning Time: 0.119 ms
+Execution Time: 0.094 ms

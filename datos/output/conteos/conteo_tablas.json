@@ -1,0 +1,65 @@
+{
+  "proveedores.proveedor": {
+    "minimo": 100000,
+    "objetivo": 100000,
+    "logrado": 100000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "proveedores.contrato_suministro": {
+    "minimo": 10000,
+    "objetivo": 15000,
+    "logrado": 15000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "catalogo.sku": {
+    "minimo": 200000,
+    "objetivo": 400000,
+    "logrado": 400000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "logistica.cedi": {
+    "minimo": 5,
+    "objetivo": 5,
+    "logrado": 10,
+    "diferencia_objetivo": 5,
+    "estado": "PASA_OBJETIVO"
+  },
+  "logistica.franja_descargue": {
+    "minimo": 90000,
+    "objetivo": 150000,
+    "logrado": 150000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "ordenes.orden_compra": {
+    "minimo": 300000,
+    "objetivo": 500000,
+    "logrado": 500000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "ordenes.linea_orden": {
+    "minimo": 1500000,
+    "objetivo": 3000000,
+    "logrado": 3000000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "ordenes.evento_auditoria": {
+    "minimo": 500000,
+    "objetivo": 800000,
+    "logrado": 800000,
+    "diferencia_objetivo": 0,
+    "estado": "PASA_OBJETIVO"
+  },
+  "catalogo.proveedor_sku": {
+    "minimo": 0,
+    "objetivo": 0,
+    "logrado": 701280,
+    "diferencia_objetivo": 701280,
+    "estado": "PASA_MEDIDO"
+  }
+}

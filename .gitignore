@@ -1,4 +1,4 @@
-datos/output/*.csv
 datos/__pycache__/
 __pycache__/
 *.py[cod]
+datos/.pg_socket/

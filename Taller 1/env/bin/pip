@@ -1,0 +1,8 @@
+#!/bin/sh
+'''exec' "/home/lacastrilp/Documentos/Semestre 2026-2/Aplicables/Taller 1/env/bin/python" "$0" "$@"
+' '''
+import sys
+from pip._internal.cli.main import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

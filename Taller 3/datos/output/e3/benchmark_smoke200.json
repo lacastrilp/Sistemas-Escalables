@@ -1,0 +1,110 @@
+{
+  "fase": "smoke200",
+  "timestamp": "2026-10-12T23:14:04.098148",
+  "resultados": {
+    "Q1": {
+      "frio": {
+        "p50_ms": 0.1367,
+        "p95_ms": 0.4461,
+        "p99_ms": 0.5771,
+        "avg_ms": 0.1824,
+        "min_ms": 0.103,
+        "max_ms": 0.6346,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 5179.9
+      },
+      "caliente": {
+        "p50_ms": 0.1511,
+        "p95_ms": 0.4544,
+        "p99_ms": 0.8181,
+        "avg_ms": 0.2032,
+        "min_ms": 0.1088,
+        "max_ms": 1.1665,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 4561.62
+      }
+    },
+    "Q2": {
+      "frio": {
+        "p50_ms": 0.2086,
+        "p95_ms": 0.3835,
+        "p99_ms": 0.8116,
+        "avg_ms": 0.2299,
+        "min_ms": 0.1697,
+        "max_ms": 0.8945,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 4132.79
+      },
+      "caliente": {
+        "p50_ms": 0.338,
+        "p95_ms": 0.8306,
+        "p99_ms": 0.9683,
+        "avg_ms": 0.4462,
+        "min_ms": 0.231,
+        "max_ms": 1.5679,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 2142.66
+      }
+    },
+    "Q3": {
+      "frio": {
+        "p50_ms": 0.2331,
+        "p95_ms": 0.8234,
+        "p99_ms": 1.1634,
+        "avg_ms": 0.3368,
+        "min_ms": 0.1265,
+        "max_ms": 1.255,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 2803.57
+      },
+      "caliente": {
+        "p50_ms": 0.1729,
+        "p95_ms": 0.3887,
+        "p99_ms": 0.7647,
+        "avg_ms": 0.1963,
+        "min_ms": 0.1053,
+        "max_ms": 0.8041,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 4713.34
+      }
+    },
+    "Q5": {
+      "frio": {
+        "p50_ms": 0.1584,
+        "p95_ms": 0.3274,
+        "p99_ms": 0.8213,
+        "avg_ms": 0.1912,
+        "min_ms": 0.1328,
+        "max_ms": 0.8905,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 4928.45
+      },
+      "caliente": {
+        "p50_ms": 0.3392,
+        "p95_ms": 0.7773,
+        "p99_ms": 0.9116,
+        "avg_ms": 0.3871,
+        "min_ms": 0.2847,
+        "max_ms": 1.0156,
+        "ok": 200,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 2455.04
+      }
+    }
+  }
+}

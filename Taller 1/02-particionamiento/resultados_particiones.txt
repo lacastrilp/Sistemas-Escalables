@@ -1,0 +1,49 @@
+Escenario A: tabla plana + indice
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Seq Scan on pedidos  (cost=0.00..24.88 rows=1 width=68) (actual time=0.001..0.002 rows=0 loops=1)
+   Filter: ((fecha_pedido >= '2023-01-01'::date) AND (fecha_pedido <= '2023-12-31'::date) AND (cliente_id = 350000))
+ Planning:
+   Buffers: shared hit=43
+ Planning Time: 0.546 ms
+ Execution Time: 0.110 ms
+(6 rows)
+
+Escenario B: particionada + indice
+                                                             QUERY PLAN                                                             
+------------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on pedidos_2023 pedidos_part  (cost=4.18..12.66 rows=1 width=68) (actual time=0.003..0.004 rows=0 loops=1)
+   Recheck Cond: (cliente_id = 350000)
+   Filter: ((fecha_pedido >= '2023-01-01'::date) AND (fecha_pedido <= '2023-12-31'::date))
+   Buffers: shared hit=2
+   ->  Bitmap Index Scan on pedidos_2023_cliente_id_idx  (cost=0.00..4.18 rows=4 width=0) (actual time=0.002..0.002 rows=0 loops=1)
+         Index Cond: (cliente_id = 350000)
+         Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=239 read=4
+ Planning Time: 1.620 ms
+ Execution Time: 0.014 ms
+(11 rows)
+
+Escenario C: particionada sin indice
+DROP INDEX
+DROP INDEX
+DROP INDEX
+                                                          QUERY PLAN                                                          
+------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on pedidos_2023 pedidos_part  (cost=12.65..21.13 rows=1 width=68) (actual time=0.001..0.001 rows=0 loops=1)
+   Recheck Cond: ((fecha_pedido >= '2023-01-01'::date) AND (fecha_pedido <= '2023-12-31'::date))
+   Filter: (cliente_id = 350000)
+   Buffers: shared hit=1
+   ->  Bitmap Index Scan on pedidos_2023_pkey  (cost=0.00..12.65 rows=4 width=0) (actual time=0.001..0.001 rows=0 loops=1)
+         Index Cond: ((fecha_pedido >= '2023-01-01'::date) AND (fecha_pedido <= '2023-12-31'::date))
+         Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=19
+ Planning Time: 0.088 ms
+ Execution Time: 0.007 ms
+(11 rows)
+
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX

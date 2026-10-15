@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-10-11T23:38:57.180718",
+  "estado_general": "PASA",
+  "conteos_bd": {
+    "proveedores.proveedor": {
+      "minimo": 100000,
+      "objetivo": 100000,
+      "logrado": 100000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "proveedores.contrato_suministro": {
+      "minimo": 10000,
+      "objetivo": 15000,
+      "logrado": 15000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "catalogo.sku": {
+      "minimo": 200000,
+      "objetivo": 400000,
+      "logrado": 400000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "logistica.cedi": {
+      "minimo": 5,
+      "objetivo": 5,
+      "logrado": 10,
+      "diferencia_objetivo": 5,
+      "estado": "PASA_OBJETIVO"
+    },
+    "logistica.franja_descargue": {
+      "minimo": 90000,
+      "objetivo": 150000,
+      "logrado": 150000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "ordenes.orden_compra": {
+      "minimo": 300000,
+      "objetivo": 500000,
+      "logrado": 500000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "ordenes.linea_orden": {
+      "minimo": 1500000,
+      "objetivo": 3000000,
+      "logrado": 3000000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "ordenes.evento_auditoria": {
+      "minimo": 500000,
+      "objetivo": 800000,
+      "logrado": 800000,
+      "diferencia_objetivo": 0,
+      "estado": "PASA_OBJETIVO"
+    },
+    "catalogo.proveedor_sku": {
+      "minimo": 0,
+      "objetivo": 0,
+      "logrado": 701280,
+      "diferencia_objetivo": 701280,
+      "estado": "PASA_MEDIDO"
+    }
+  },
+  "cobertura_contratos": {
+    "proveedores_totales": 100000,
+    "contratos_totales": 15000,
+    "contratos_activos": 2446,
+    "proveedores_con_contrato": 15000,
+    "porcentaje_cobertura": 15.0
+  },
+  "sesgo_zipf": {
+    "top_1_pct": 54.82,
+    "top_5_pct": 69.83,
+    "top_20_pct": 84.95,
+    "top_proveedor_id": 1,
+    "top_proveedor_ordenes": 30880
+  },
+  "sesgo_skus": {
+    "total_skus": 400000,
+    "total_lineas": 3000000,
+    "top_10_limit": 40000,
+    "lineas_hot": 1859292,
+    "porcentaje_lineas_hot": 61.98
+  },
+  "estacionalidad": {
+    "pct_pico_horario": 71.92,
+    "pct_valle_nocturno": 4.03,
+    "meses_cubiertos": 24
+  },
+  "casos_borde": {
+    "caso_1_orden_300_lineas": {
+      "estado": "PASA",
+      "orden_id": 1,
+      "lineas": 300
+    },
+    "caso_2_contrato_vencido_ayer": {
+      "estado": "PASA",
+      "contrato_id": 1,
+      "fecha_fin": "2025-12-30 23:59:59"
+    },
+    "caso_3_contrato_vence_hoy_mediodia": {
+      "estado": "PASA",
+      "contrato_id": 2,
+      "fecha_fin": "2025-12-31 12:00:00"
+    },
+    "caso_4_franja_1_cupo_libre": {
+      "estado": "PASA",
+      "franja_id": 150000,
+      "capacidad": 10,
+      "reservados": 9
+    },
+    "caso_5_proveedor_sin_contrato": {
+      "estado": "PASA",
+      "proveedor_id": 15001,
+      "nombre": "Proveedor 015001 S.A.S."
+    },
+    "caso_6_sku_fuera_catalogo": {
+      "estado": "PASA",
+      "orden_id": 435,
+      "proveedor_id": 39274,
+      "sku_id": 289101
+    },
+    "caso_7_proveedor_hot": {
+      "estado": "PASA",
+      "proveedor_id": 1,
+      "ordenes": 30880
+    },
+    "caso_8_proveedor_sin_ordenes_mes": {
+      "estado": "PASA",
+      "proveedor_id": 410,
+      "mes_sin_ordenes": "2024-01"
+    }
+  },
+  "total_checks_ok": 25,
+  "total_checks_fail": 0
+}

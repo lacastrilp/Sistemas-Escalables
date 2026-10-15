@@ -1,0 +1,51 @@
+{
+  "semilla": 42,
+  "determinismo_demostrado": true,
+  "archivos_comparados": {
+    "cedi.csv": {
+      "hash_corrida_1": "e7be204d212a6adfbb22c0f57598392c58c2a0bc4dcec62ec885d240a0381bee",
+      "hash_corrida_2": "e7be204d212a6adfbb22c0f57598392c58c2a0bc4dcec62ec885d240a0381bee",
+      "identicos": true
+    },
+    "contratos.csv": {
+      "hash_corrida_1": "ece3b52076b2443d12c923a055a349be366184755c9ef4040e8961d8366973c4",
+      "hash_corrida_2": "ece3b52076b2443d12c923a055a349be366184755c9ef4040e8961d8366973c4",
+      "identicos": true
+    },
+    "eventos.csv": {
+      "hash_corrida_1": "e6840b516df56ae52956ceca4db8fd8c3c14cc93930537f9106a77831f260261",
+      "hash_corrida_2": "e6840b516df56ae52956ceca4db8fd8c3c14cc93930537f9106a77831f260261",
+      "identicos": true
+    },
+    "franjas.csv": {
+      "hash_corrida_1": "2407855fc7c39878a559375c5e74d484528148fabbaa3c9e55b9374a5253819f",
+      "hash_corrida_2": "2407855fc7c39878a559375c5e74d484528148fabbaa3c9e55b9374a5253819f",
+      "identicos": true
+    },
+    "lineas_orden.csv": {
+      "hash_corrida_1": "3549e09d8ce6cb41a76f00fef02507de1c5eb1be8023af6ce2058393ab822829",
+      "hash_corrida_2": "3549e09d8ce6cb41a76f00fef02507de1c5eb1be8023af6ce2058393ab822829",
+      "identicos": true
+    },
+    "ordenes.csv": {
+      "hash_corrida_1": "65e41c36e035bfc541f14ad153d1033528cbb2f2d047251a4dae31f10abfd423",
+      "hash_corrida_2": "65e41c36e035bfc541f14ad153d1033528cbb2f2d047251a4dae31f10abfd423",
+      "identicos": true
+    },
+    "proveedor_sku.csv": {
+      "hash_corrida_1": "046e81512669221dc646def326e2a76d14449f4303b8b9d63b515322c362405f",
+      "hash_corrida_2": "046e81512669221dc646def326e2a76d14449f4303b8b9d63b515322c362405f",
+      "identicos": true
+    },
+    "proveedores.csv": {
+      "hash_corrida_1": "46dfe4fc1862d19ae4b34defb96aeb9517b27c838fb33623549e9cdf8d64032c",
+      "hash_corrida_2": "46dfe4fc1862d19ae4b34defb96aeb9517b27c838fb33623549e9cdf8d64032c",
+      "identicos": true
+    },
+    "skus.csv": {
+      "hash_corrida_1": "57a3ee5e925cdf10d1ad7718f259dcd25096f34d0848c69ab6218a7d6549b7eb",
+      "hash_corrida_2": "57a3ee5e925cdf10d1ad7718f259dcd25096f34d0848c69ab6218a7d6549b7eb",
+      "identicos": true
+    }
+  }
+}

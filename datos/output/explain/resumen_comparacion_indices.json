@@ -1,0 +1,11 @@
+{
+  "q4": {
+    "archivo_antes": "datos/output/explain/q4_antes_indices.txt",
+    "archivo_idx_orden": "datos/output/explain/q4_despues_idx_orden_proveedor_fecha.txt",
+    "archivo_idx_lineas": "datos/output/explain/q4_despues_idx_linea_orden.txt"
+  },
+  "q5": {
+    "archivo_antes": "datos/output/explain/q5_antes_indices.txt",
+    "archivo_despues": "datos/output/explain/q5_despues_idx_orden_proveedor_fecha.txt"
+  }
+}

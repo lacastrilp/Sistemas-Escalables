@@ -8,8 +8,15 @@ services:
       POSTGRES_PASSWORD: retail
     ports:
       - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retail -d retail"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./datos/.pg_socket:/var/run/postgresql
 
 volumes:
   postgres_data:

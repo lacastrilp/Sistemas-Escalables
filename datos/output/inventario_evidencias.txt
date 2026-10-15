@@ -1,0 +1,51 @@
+INVENTARIO DE EVIDENCIAS TÉCNICAS - ENTREGABLE 2 (ESCALABILIDAD DE DATOS)
+Proyecto Integrador: Portal B2B de Proveedores de Retail (Grupo EKS)
+Fecha de Medición: Octubre 2026
+Estado General: APROBADO (100% Requisitos Cumplidos)
+
+1. MODELO FÍSICO Y ESQUEMAS
+- modelo-fisico.sql                               : DDL de los 4 esquemas (proveedores, catalogo, logistica, ordenes) sin JOINs inter-esquema, TIMESTAMP en contratos y fecha_compromiso en ordenes
+- datos/sql/indices_secundarios.sql               : Índices secundarios post-carga desacoplados para optimizar COPY y soportar EXPLAIN antes/después
+- datos/sql/esquema.sql                           : Script DDL de referencia
+
+2. CONTEOS REALES Y AUDITORÍA DE BD
+- datos/output/conteos/conteo_tablas.json          : Conteos reales de PostgreSQL contra Mínimo y Objetivo (4.965.010 filas en entidades objetivo, 5.666.290 filas totales)
+- datos/output/resumen_final.json                  : Auditoría de 25 checks automáticos (100% PASA): volúmenes, cobertura, Zipf, estacionalidad, 8 casos borde y checksums
+- datos/output/tiempos_carga.json                  : Tiempos reales por tabla de COPY masivo (97s netos, 58.415 filas/seg)
+
+3. DETERMINISMO
+- datos/output/checksums.sha256                    : Hashes SHA-256 de los 9 archivos CSV generados con --seed 42
+- datos/output/determinismo/hashes_comparacion.json: Comparación de 2 corridas independientes demostrando igualdad bit a bit (100% idénticos)
+
+4. ESTRATEGIAS DE INYECCIÓN Y CARGA INCREMENTAL
+- datos/output/benchmark_carga_resultados.json     : Métricas de las 4 estrategias sobre muestra común de 351.428 filas (COPY: 37k rps, Batch: 15.7k rps, Auto: 967 rps, App: 2.2k rps)
+- datos/output/estrategias/resultados_inyeccion.csv: Datos crudos tabulados de rendimiento y tiempos
+- datos/output/carga_incremental_resultados.json   : Inyección incremental de 5.000 órdenes vía ruta real (4.006 aceptadas, 994 rechazadas, 0 sobreventas de franja)
+
+5. CONSULTAS PATRÓN Q1-Q5 Y LATENCIAS
+- datos/output/benchmark_queries_resultados.json   : Percentiles p50, p95, p99 y promedios para 200 iteraciones en frío y caliente
+- datos/output/queries/resumen_latencias_q1_q5.csv : Resumen tabular de latencias
+- datos/output/queries/observaciones_latencias.csv : Registro crudo individual de cada iteración cronometrada con time.perf_counter
+
+6. PLANES EXPLAIN (ANALYZE, BUFFERS) ANTES Y DESPUÉS
+- datos/output/explain/q5_antes_indices.txt                        : Q5 antes de idx_orden_proveedor_fecha (2.507 ms, 3.869 buffers, 4.063 tuplas descartadas por filtro)
+- datos/output/explain/q5_despues_idx_orden_proveedor_fecha.txt    : Q5 después de idx_orden_proveedor_fecha (0.094 ms, 53 buffers, 0 tuplas descartadas, 26.6x más rápido)
+- datos/output/explain/q4_antes_indices.txt                        : Q4 antes de índices de línea (341.25 ms, Parallel Seq Scan sobre 3M líneas, sort merge en disco)
+- datos/output/explain/q4_despues_idx_orden_proveedor_fecha.txt    : Q4 con índice compuesto de orden
+- datos/output/explain/q4_despues_idx_linea_orden.txt              : Q4 con índice de líneas (228.89 ms, Index Scan en líneas, eliminación de escaneo secuencial)
+- datos/output/explain/resumen_comparacion_indices.json            : Índice de trazabilidad de planes evaluados
+
+7. GRÁFICAS DE EVIDENCIA (PNG Y CSVs FUENTE)
+- datos/output/grafica_zipf.png                   : Distribución Zipf Log-Log y curva de concentración acumulada (Top 1% = 54.8%, Top 5% = 69.8%)
+- datos/output/grafica_concentracion_sku.png      : Concentración de catálogo (Top 10% SKU en 62.0% de líneas)
+- datos/output/grafica_estacionalidad_diaria.png  : Estacionalidad diaria sobre 24 meses (cierres de fin de mes ~25%)
+- datos/output/grafica_estacionalidad_horaria.png : Estacionalidad horaria (pico 8-11am = 71.9%, valle = 4.0%)
+- datos/output/grafica_estrategias_inyeccion.png  : Throughput y tiempos comparativos de inyección
+- datos/output/grafica_latencias_consultas.png    : Comparativa p50 frío vs caliente en escala logarítmica
+- datos/output/graficas/*.csv                     : Archivos CSV con los datos fuente de cada gráfica
+
+8. DOCUMENTACIÓN Y GUÍAS
+- Entregable2_Informe_Escalabilidad_de_Datos.md   : Informe técnico principal con métricas reales
+- Entregable2_Informe_Escalabilidad_de_Datos.html : Informe técnico compilado en formato HTML
+- docs/MATRIZ_TRAZABILIDAD_ENTREGABLE2.md         : Matriz de trazabilidad integral con todos los criterios
+- docs/README_REPRODUCCION.md                     : Guía de reproducción técnica paso a paso

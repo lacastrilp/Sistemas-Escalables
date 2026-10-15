@@ -1,0 +1,11 @@
+{
+  "proveedores.proveedor": {"filas": 100000, "tiempo_seg": 1, "filas_por_seg": 100000},
+  "proveedores.contrato_suministro": {"filas": 15000, "tiempo_seg": 1, "filas_por_seg": 15000},
+  "catalogo.sku": {"filas": 400000, "tiempo_seg": 2, "filas_por_seg": 200000},
+  "catalogo.proveedor_sku": {"filas": 701280, "tiempo_seg": 12, "filas_por_seg": 58440},
+  "logistica.cedi": {"filas": 10, "tiempo_seg": 1, "filas_por_seg": 10},
+  "logistica.franja_descargue": {"filas": 150000, "tiempo_seg": 2, "filas_por_seg": 75000},
+  "ordenes.orden_compra": {"filas": 500000, "tiempo_seg": 16, "filas_por_seg": 31250},
+  "ordenes.linea_orden": {"filas": 3000000, "tiempo_seg": 53, "filas_por_seg": 56603},
+  "ordenes.evento_auditoria": {"filas": 800000, "tiempo_seg": 11, "filas_por_seg": 72727}
+}

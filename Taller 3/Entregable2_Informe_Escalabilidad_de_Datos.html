@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe Técnico: Entregable 2 — Escalabilidad de los Datos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tinta: #0F2240;
+    --teal: #17607D;
+    --ambar: #D99A2B;
+    --ambar-suave: #FDF8ED;
+    --panel: #F4F7FA;
+    --linea: #DCE3EC;
+    --texto: #1F2A37;
+    --suave: #4B5563;
+    --papel: #FFFFFF;
+    --verde: #059669;
+    --rojo: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--texto);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .contenedor {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 3rem 1.8rem 6rem;
+  }
+  header.portada {
+    border-bottom: 3px solid var(--tinta);
+    padding-bottom: 1.8rem;
+    margin-bottom: 2.5rem;
+  }
+  .institucion {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 0.8rem;
+  }
+  h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    line-height: 1.15;
+    color: var(--tinta);
+    margin: 0 0 0.8rem;
+    letter-spacing: -0.02em;
+  }
+  .metadatos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.92rem;
+    color: var(--suave);
+    border-top: 1px solid var(--linea);
+    padding-top: 0.9rem;
+    margin-top: 1.2rem;
+  }
+  .metadatos strong { color: var(--tinta); }
+  h2 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 1.65rem;
+    color: var(--tinta);
+    margin: 2.8rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--linea);
+  }
+  h3 {
+    font-size: 1.15rem;
+    color: var(--teal);
+    margin: 1.8rem 0 0.8rem;
+    font-weight: 700;
+  }
+  p { margin: 0 0 1rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.4rem 0 2rem;
+    font-size: 0.88rem;
+  }
+  th, td {
+    border: 1px solid var(--linea);
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--tinta);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  tbody tr:nth-child(even) { background: #F9FAFB; }
+  tbody tr:hover { background: #F3F4F6; }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--linea);
+    margin: 1rem 0 0.4rem;
+    display: block;
+  }
+  em {
+    display: block;
+    font-size: 0.84rem;
+    color: var(--suave);
+    margin-bottom: 1.6rem;
+  }
+  pre {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin: 1rem 0 1.5rem;
+  }
+  code {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--panel);
+    color: var(--tinta);
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+  }
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid var(--teal);
+    background: var(--panel);
+    margin: 1.4rem 0;
+    padding: 0.9rem 1.2rem;
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 0; }
+  .badge-pasa {
+    background: #D1FAE5;
+    color: #065F46;
+    padding: 0.2em 0.5em;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+  @media print {
+    body { font-size: 9.5pt; }
+    .contenedor { max-width: none; padding: 0; }
+    h2 { page-break-after: avoid; }
+    table { page-break-inside: auto; font-size: 8pt; }
+    tr { page-break-inside: avoid; }
+    pre { font-size: 7.5pt; background: #FFF; color: #000; border: 1px solid #CCC; }
+  }
+</style>
+</head>
+<body>
+<div class="contenedor">
+<h1 id="informe-tecnico-entregable-2-escalabilidad-de-los-datos">Informe Técnico: Entregable 2 — Escalabilidad de los Datos</h1>
+<p><strong>Universidad EAFIT · Aplicaciones y Sistemas Escalables</strong><br />
+<strong>Proyecto Integrador: Portal B2B de Proveedores de Retail</strong><br />
+<strong>Equipo / Integrantes:</strong> Sara Lopez Marin / Luis Alejandro Castrillon Pulgarin (Grupo EKS)<br />
+<strong>Fecha:</strong> Octubre 2026 (Auditoría y Corrección Integral)  </p>
+<hr />
+<h2 id="1-volumen-del-conjunto-de-datos-y-modelo-fisico-c1">1. Volumen del Conjunto de Datos y Modelo Físico (C1)</h2>
+<p>Para responder a la pregunta fundamental del entregable: <em>«¿Qué le pasa a mis consultas cuando el dato deja de ser de juguete?»</em>, se diseñó, generó y cargó un dataset sintético masivo a escala de producción respetando la separación estricta de los <strong>4 esquemas del dominio</strong> (<code>proveedores</code>, <code>catalogo</code>, <code>logistica</code>, <code>ordenes</code>).</p>
+<p>El DDL físico implementado en <code>modelo-fisico.sql</code> garantiza que no existan relaciones <code>JOIN</code> entre tablas de diferentes esquemas a nivel de base de datos. Las relaciones inter-módulo se resuelven a nivel de aplicación mediante identificadores (<code>BIGINT</code>). Asimismo, los índices secundarios se desacoplaron en <code>datos/sql/indices_secundarios.sql</code> para ser creados post-carga masiva, asegurando una carga eficiente con <code>COPY</code> y permitiendo la medición honesta de planes <code>EXPLAIN</code> antes y después de su creación.</p>
+<h3 id="tabla-de-volumen-logrado-vs-exigido-verificacion-en-postgresql">Tabla de Volumen Logrado vs. Exigido (Verificación en PostgreSQL)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Entidad Lógica</th>
+<th style="text-align: left;">Tabla / Esquema</th>
+<th style="text-align: center;">Mínimo HTML</th>
+<th style="text-align: center;">Objetivo HTML</th>
+<th style="text-align: center;">Logrado en BD</th>
+<th style="text-align: center;">Diferencia</th>
+<th style="text-align: center;">Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Proveedores</strong></td>
+<td style="text-align: left;"><code>proveedores.proveedor</code></td>
+<td style="text-align: center;">100 000</td>
+<td style="text-align: center;">100 000</td>
+<td style="text-align: center;"><strong>100 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Contratos de Suministro</strong></td>
+<td style="text-align: left;"><code>proveedores.contrato_suministro</code></td>
+<td style="text-align: center;">10 000</td>
+<td style="text-align: center;">15 000</td>
+<td style="text-align: center;"><strong>15 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SKUs del Catálogo</strong></td>
+<td style="text-align: left;"><code>catalogo.sku</code></td>
+<td style="text-align: center;">200 000</td>
+<td style="text-align: center;">400 000</td>
+<td style="text-align: center;"><strong>400 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Centros de Distribución (CEDI)</strong></td>
+<td style="text-align: left;"><code>logistica.cedi</code></td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;"><strong>10</strong></td>
+<td style="text-align: center;">+5</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Franjas de Descargue CEDI</strong></td>
+<td style="text-align: left;"><code>logistica.franja_descargue</code></td>
+<td style="text-align: center;">90 000</td>
+<td style="text-align: center;">150 000</td>
+<td style="text-align: center;"><strong>150 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Órdenes de Compra (24 meses)</strong></td>
+<td style="text-align: left;"><code>ordenes.orden_compra</code></td>
+<td style="text-align: center;">300 000</td>
+<td style="text-align: center;">500 000</td>
+<td style="text-align: center;"><strong>500 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Líneas de Orden</strong></td>
+<td style="text-align: left;"><code>ordenes.linea_orden</code></td>
+<td style="text-align: center;">1 500 000</td>
+<td style="text-align: center;">3 000 000</td>
+<td style="text-align: center;"><strong>3 000 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Eventos de Auditoría</strong></td>
+<td style="text-align: left;"><code>ordenes.evento_auditoria</code></td>
+<td style="text-align: center;">500 000</td>
+<td style="text-align: center;">800 000</td>
+<td style="text-align: center;"><strong>800 000</strong></td>
+<td style="text-align: center;">+0</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SUBTOTAL ENTIDADES CON OBJETIVO</strong></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: center;"><strong>2 700 005</strong></td>
+<td style="text-align: center;"><strong>4 965 005</strong></td>
+<td style="text-align: center;"><strong>4 965 010</strong></td>
+<td style="text-align: center;"><strong>+5</strong></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Catálogo Negociado (Prov–SKU)</strong></td>
+<td style="text-align: left;"><code>catalogo.proveedor_sku</code></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><strong>701 280</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_MEDIDO</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>GRAN TOTAL REGISTROS EN BD</strong></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: center;"><strong>≈ 2 700 000</strong></td>
+<td style="text-align: center;"><strong>≈ 4 965 000</strong></td>
+<td style="text-align: center;"><strong>5 666 290</strong></td>
+<td style="text-align: center;"><strong>+701 290</strong></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA_OBJETIVO</span></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<strong>Aclaración Contable:</strong> La especificación HTML indica sumas aproximadas de 2.5M (mínimo) y 4.9M (objetivo). La suma aritmética exacta de las entidades con objetivo explícito es <strong>2.700.005 como mínimo</strong> y <strong>4.965.005 como objetivo</strong>. El dataset cargado alcanza <strong>4.965.010 filas</strong> en dichas entidades y suma <strong>5.666.290 filas totales</strong> al incluir el catálogo negociado, superando en todas y cada una de las tablas individuales la meta objetivo.</p>
+</blockquote>
+<h3 id="cobertura-de-contratos-de-proveedores">Cobertura de Contratos de Proveedores</h3>
+<p>Se generaron exactamente 15.000 contratos de suministro asignados a 15.000 proveedores independientes sobre la base de 100.000 proveedores. Esto representa una <strong>cobertura real del 15.00%</strong>, satisfaciendo la regla de negocio del retail estipulada en el enunciado donde la vasta mayoría (~85%) de los proveedores registrados no cuenta con contrato vigente, constituyendo el camino de rechazo prioritario del flujo transaccional.</p>
+<hr />
+<h2 id="2-forma-de-los-datos-sesgo-zipf-estacionalidad-y-casos-borde-c2">2. Forma de los Datos: Sesgo Zipf, Estacionalidad y Casos Borde (C2)</h2>
+<h3 id="a-sesgo-zipf-en-proveedores-s-095">A. Sesgo Zipf en Proveedores ($s = 0.95$)</h3>
+<p>Para modelar la asimetría real del retail donde un puñado de superproveedores concentra la mayoría del tráfico:
+- <strong>Top 1 % de proveedores (1 000 prov):</strong> Concentra el <strong>54.82 %</strong> de las órdenes totales (mínimo exigido: $\ge 15\%$).
+- <strong>Top 5 % de proveedores (5 000 prov):</strong> Concentra el <strong>69.83 %</strong> de las órdenes totales (mínimo exigido: $\ge 40\%$).
+- <strong>Top 20 % de proveedores (20 000 prov):</strong> Concentra el <strong>84.95 %</strong> de las órdenes totales.
+- <strong>Superproveedor caliente (<code>proveedor_id = 1</code>):</strong> Acumula <strong>30 880 órdenes</strong> y <strong>184 691 líneas de detalle</strong>.</p>
+<p><img alt="Distribución Zipf de Órdenes por Proveedor" src="datos/output/grafica_zipf.png" />
+<em>Figura 1: Distribución Zipf de Órdenes por Proveedor. A la izquierda, escala Log-Log que evidencia la ley de potencia ($s=0.95$). A la derecha, curva de concentración acumulada donde el top 1% concentra más del 54% del tráfico.</em></p>
+<hr />
+<h3 id="b-sesgo-de-catalogo-skus-en-lineas-de-orden">B. Sesgo de Catálogo (SKUs en Líneas de Orden)</h3>
+<p>El enunciado exige que el 10% superior del catálogo aparezca en aproximadamente el 60% de las líneas de orden:
+- <strong>Top 10% de SKUs (<code>id &lt;= 40 000</code>):</strong> Concentra <strong>1 859 292 líneas de orden (61.98 %)</strong> de los 3 millones de líneas generadas.
+- <strong>Resto 90% de SKUs (<code>id &gt; 40 000</code>):</strong> Representa el <strong>38.02 %</strong> de las líneas.</p>
+<p><img alt="Concentración de SKUs en Líneas" src="datos/output/grafica_concentracion_sku.png" />
+<em>Figura 2: Concentración de Catálogo en Líneas de Orden. El 10% de los SKU participa en el 62% del volumen total de compras.</em></p>
+<hr />
+<h3 id="c-estacionalidad-mensual-y-horaria">C. Estacionalidad Mensual y Horaria</h3>
+<p><img alt="Estacionalidad Diaria sobre 24 Meses" src="datos/output/grafica_estacionalidad_diaria.png" />
+<em>Figura 3: Estacionalidad Diaria de Órdenes de Compra (24 Meses, 2024–2025). Muestra los picos característicos de cierre de mes.</em></p>
+<ul>
+<li><strong>Estacionalidad Mensual:</strong> Los <strong>últimos 3 días hábiles de cada mes</strong> concentran de manera consistente el <strong>25.0 %</strong> del volumen mensual de órdenes, reproduciendo los cierres contables y de abastecimiento de retail. Se abarcaron los <strong>24 meses completos</strong> del horizonte 2024–2025.</li>
+</ul>
+<p><img alt="Estacionalidad Horaria por Hora del Día" src="datos/output/grafica_estacionalidad_horaria.png" />
+<em>Figura 4: Distribución Horaria de la Emisión de Órdenes. Ventana pico matutina (08:00–11:00 AM) y valle nocturno.</em></p>
+<ul>
+<li><strong>Estacionalidad Horaria:</strong></li>
+<li><strong>Ventana Pico (08:00 – 10:59 a.m.):</strong> <strong>359 597 órdenes (71.92 %)</strong> [Objetivo: $&gt; 70\%$].</li>
+<li><strong>Valle Nocturno (00:00 – 05:59 a.m.):</strong> <strong>20 138 órdenes (4.03 %)</strong> [Objetivo: $&lt; 5\%$].</li>
+</ul>
+<hr />
+<h3 id="d-verificacion-de-los-8-casos-borde-obligatorios">D. Verificación de los 8 Casos Borde Obligatorios</h3>
+<p>Cada uno de los ocho casos fue sembrado de manera determinista y verificado directamente contra PostgreSQL mediante predicados SQL automáticos (<code>datos/verificar.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">#</th>
+<th style="text-align: left;">Caso Borde</th>
+<th style="text-align: left;">Identificador Localizado en BD</th>
+<th style="text-align: left;">Predicado SQL Verificado</th>
+<th style="text-align: center;">Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: left;">Orden con exactamente 300 líneas</td>
+<td style="text-align: left;"><code>orden_id = 1</code> (<code>numero_orden = 'ORD-000000001'</code>)</td>
+<td style="text-align: left;"><code>COUNT(lineas) = 300</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: left;">Contrato vencido ayer respecto a <code>--as-of</code></td>
+<td style="text-align: left;"><code>contrato_id = 1</code> (<code>proveedor_id = 1</code>)</td>
+<td style="text-align: left;"><code>fecha_fin = '2025-12-30 23:59:59'</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: left;">Contrato que vence hoy al mediodía (12:00)</td>
+<td style="text-align: left;"><code>contrato_id = 2</code> (<code>proveedor_id = 2</code>)</td>
+<td style="text-align: left;"><code>fecha_fin = '2025-12-31 12:00:00'</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: left;">Última franja disponible con 1 cupo libre</td>
+<td style="text-align: left;"><code>franja_id = 150000</code> (<code>cedi_id = 1</code>)</td>
+<td style="text-align: left;"><code>capacidad = 10 AND reservados = 9</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>5</strong></td>
+<td style="text-align: left;">Proveedor sin contrato vigente</td>
+<td style="text-align: left;"><code>proveedor_id = 15001</code></td>
+<td style="text-align: left;"><code>NOT EXISTS (contrato_suministro)</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>6</strong></td>
+<td style="text-align: left;">Orden con SKU fuera de catálogo negociado</td>
+<td style="text-align: left;"><code>orden_id = 435</code>, <code>sku_id = 289101</code></td>
+<td style="text-align: left;"><code>NOT EXISTS (proveedor_sku)</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>7</strong></td>
+<td style="text-align: left;">Proveedor hot con $\ge 5 000$ órdenes</td>
+<td style="text-align: left;"><code>proveedor_id = 1</code> (<strong>30 880 órdenes</strong>)</td>
+<td style="text-align: left;"><code>COUNT(ordenes) &gt;= 5000</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>8</strong></td>
+<td style="text-align: left;">Proveedor activo sin órdenes en mes completo</td>
+<td style="text-align: left;"><code>proveedor_id = 410</code> (estado <code>ACTIVO</code>)</td>
+<td style="text-align: left;"><code>COUNT(ordenes en 2024-01) = 0</code></td>
+<td style="text-align: center;"><span class='badge-pasa'>PASA</span></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Corrección de Tipo Temporal en Caso 3:</strong> Para representar fidedignamente el vencimiento "hoy a las 12:00 del mediodía", se modificó <code>fecha_fin</code> en <code>proveedores.contrato_suministro</code> a <code>TIMESTAMP NOT NULL</code>. Esto permite evaluar con exactitud la hora de corte a las 12:00:00 sin truncar a fecha sin hora.</p>
+</blockquote>
+<hr />
+<h2 id="3-generador-determinista-y-parametrizable-c3">3. Generador Determinista y Parametrizable (C3)</h2>
+<p>El generador <code>datos/generar.py</code> opera por streaming en bloques directamente a disco (sin cargar los 3 millones de líneas en memoria RAM) y resuelve claves foráneas mediante aritmética sobre los identificadores.
+- <strong>Demostración de Determinismo:</strong> Se automatizó una prueba en <code>datos/verificar_determinismo.py</code> que ejecuta dos corridas independientes desde cero con la misma semilla fija (<code>--seed 42</code>). La comparación SHA-256 archivo por archivo demostró <strong>coincidencia del 100% en todos los archivos CSV</strong> (<code>datos/output/determinismo/hashes_comparacion.json</code>).
+- <strong>Tiempo de Ejecución:</strong> La generación completa del dataset masivo toma tan solo <strong>32.9 segundos</strong>.</p>
+<hr />
+<h2 id="4-estrategia-de-inyeccion-y-carga-medida-c4">4. Estrategia de Inyección y Carga Medida (C4)</h2>
+<p><img alt="Comparativa de Estrategias de Inyección" src="datos/output/grafica_estrategias_inyeccion.png" />
+<em>Figura 5: Cuadro Comparativo de Estrategias de Inyección. A la izquierda, throughput en filas por segundo (Mayor es Mejor). A la derecha, tiempo total de inyección sobre la muestra común de 351,428 filas (Menor es Mejor).</em></p>
+<h3 id="a-tiempos-de-carga-masiva-copy">A. Tiempos de Carga Masiva (<code>COPY</code>)</h3>
+<p>La carga de los 5.66 millones de filas en PostgreSQL se realizó respetando el orden de dependencias referenciales:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tabla / Esquema</th>
+<th style="text-align: center;">Filas Cargadas</th>
+<th style="text-align: center;">Tiempo (s)</th>
+<th style="text-align: center;">Throughput (filas/seg)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>proveedores.proveedor</code></td>
+<td style="text-align: center;">100 000</td>
+<td style="text-align: center;">1 s</td>
+<td style="text-align: center;">100 000</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>proveedores.contrato_suministro</code></td>
+<td style="text-align: center;">15 000</td>
+<td style="text-align: center;">1 s</td>
+<td style="text-align: center;">15 000</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>catalogo.sku</code></td>
+<td style="text-align: center;">400 000</td>
+<td style="text-align: center;">2 s</td>
+<td style="text-align: center;">200 000</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>catalogo.proveedor_sku</code></td>
+<td style="text-align: center;">701 280</td>
+<td style="text-align: center;">12 s</td>
+<td style="text-align: center;">58 440</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>logistica.cedi</code></td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">1 s</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>logistica.franja_descargue</code></td>
+<td style="text-align: center;">150 000</td>
+<td style="text-align: center;">2 s</td>
+<td style="text-align: center;">75 000</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ordenes.orden_compra</code></td>
+<td style="text-align: center;">500 000</td>
+<td style="text-align: center;">16 s</td>
+<td style="text-align: center;">31 250</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ordenes.linea_orden</code></td>
+<td style="text-align: center;">3 000 000</td>
+<td style="text-align: center;">53 s</td>
+<td style="text-align: center;">56 603</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ordenes.evento_auditoria</code></td>
+<td style="text-align: center;">800 000</td>
+<td style="text-align: center;">11 s</td>
+<td style="text-align: center;">72 727</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fase 1: COPY Masivo Total</strong></td>
+<td style="text-align: center;"><strong>5 666 290</strong></td>
+<td style="text-align: center;"><strong>97 s</strong></td>
+<td style="text-align: center;"><strong>58 415</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fase 2: ANALYZE Baseline (Pre-índices)</strong></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;"><strong>2 s</strong></td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fase 3: Creación Índices Secundarios</strong></td>
+<td style="text-align: center;">14 índices</td>
+<td style="text-align: center;"><strong>4 s</strong></td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fase 4: ANALYZE Final (Post-índices)</strong></td>
+<td style="text-align: center;">4 esquemas</td>
+<td style="text-align: center;"><strong>2 s</strong></td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>TIEMPO TOTAL DE CARGA Y PREPARACIÓN</strong></td>
+<td style="text-align: center;"><strong>5 666 290</strong></td>
+<td style="text-align: center;"><strong>104 s</strong></td>
+<td style="text-align: center;"><strong>54 483</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="b-cuadro-comparativo-de-las-4-estrategias-de-inyeccion">B. Cuadro Comparativo de las 4 Estrategias de Inyección</h3>
+<p>Evaluadas sobre la <strong>muestra común idéntica de 50 000 órdenes y 301 428 líneas de orden (351 428 filas totales)</strong>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Estrategia de Inyección</th>
+<th style="text-align: left;">Mecanismo y Explicación Técnica</th>
+<th style="text-align: center;">Filas Totales</th>
+<th style="text-align: center;">Tiempo Total (s)</th>
+<th style="text-align: center;">Filas / Segundo</th>
+<th style="text-align: center;">Factor vs COPY</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. <code>COPY</code> masivo</strong></td>
+<td style="text-align: left;">Protocolo streaming binario/CSV optimizado en C sin WAL síncrono por tupla.</td>
+<td style="text-align: center;">351 428</td>
+<td style="text-align: center;"><strong>9.42 s</strong></td>
+<td style="text-align: center;"><strong>37 306</strong></td>
+<td style="text-align: center;"><strong>1.0x (Piso)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. <code>INSERT</code> por lotes (1 000 por tx)</strong></td>
+<td style="text-align: left;">Sentencias <code>INSERT ... VALUES</code> agrupadas en transacciones explícitas de 1 000 tuplas.</td>
+<td style="text-align: center;">351 428</td>
+<td style="text-align: center;"><strong>22.25 s</strong></td>
+<td style="text-align: center;"><strong>15 791</strong></td>
+<td style="text-align: center;"><strong>2.4x más lento</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. <code>INSERT</code> fila a fila (autocommit)</strong></td>
+<td style="text-align: left;">El anti-patrón: parseo SQL, round-trip individual de red y fsync WAL por cada fila.</td>
+<td style="text-align: center;">351 428</td>
+<td style="text-align: center;"><strong>363.44 s</strong></td>
+<td style="text-align: center;"><strong>967</strong></td>
+<td style="text-align: center;"><strong>38.6x más lento</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. Ruta transaccional de aplicación</strong></td>
+<td style="text-align: left;">Inyección respetando reglas de negocio: validación de contrato, catálogo y franja en tx única.</td>
+<td style="text-align: center;">351 428</td>
+<td style="text-align: center;"><strong>159.32 s</strong></td>
+<td style="text-align: center;"><strong>2 206</strong></td>
+<td style="text-align: center;"><strong>16.9x más lento</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="interpretacion-de-las-diferencias">Interpretación de las Diferencias:</h4>
+<ol>
+<li><strong><code>COPY</code> vs. <code>INSERT</code> por lotes (37 306 vs 15 791 filas/seg):</strong> <code>COPY</code> ingresa directo al motor de almacenamiento omitiendo el parser y planner SQL para cada lote de sentencias.</li>
+<li><strong>El costo devastador del Autocommit (967 filas/seg):</strong> Forzar un <code>fsync</code> a disco en el Write-Ahead Log (WAL) tras cada fila individual impone una barrera física de I/O que degrada el rendimiento 38.6 veces.</li>
+<li><strong>Ruta Transaccional (2 206 filas/seg):</strong> Aunque ejecuta consultas previas de lectura sobre contratos y franjas, <strong>supera al autocommit en un 128%</strong> gracias a que agrupa la orden y sus N líneas en una única transacción atómica de negocio (<code>BEGIN ... COMMIT</code>), reduciendo las sincronizaciones de disco a una sola por orden.</li>
+</ol>
+<hr />
+<h3 id="c-inyeccion-incremental-real-de-5000-ordenes-ruta-transaccional">C. Inyección Incremental Real de 5.000 Órdenes (Ruta Transaccional)</h3>
+<p>Se ejecutó la prueba incremental exigida por el HTML sobre la base de datos masiva cargada, procesando <strong>5 000 intentos de orden</strong> mediante la ruta de negocio (<code>datos/carga_incremental.py</code>):
+- <strong>Órdenes Aceptadas y Confirmadas:</strong> <strong>4 006 órdenes</strong>.
+- <strong>Órdenes Rechazadas por Reglas de Negocio:</strong> <strong>994 órdenes</strong>.
+  - <em>Rechazo por falta de contrato activo (RF01):</em> 310 órdenes.
+  - <em>Rechazo por franja CEDI agotada (RF03):</em> 684 órdenes.
+  - <em>Rechazo por SKU no negociado (RF02):</em> 0 órdenes.
+- <strong>Líneas de Detalle Creadas:</strong> 16 041 líneas.
+- <strong>Eventos Outbox Emitidos (<code>ORDEN_CONFIRMADA</code>, RF06):</strong> 4 006 eventos.
+- <strong>Total Tuplas Escritas:</strong> <strong>24 053 registros</strong>.
+- <strong>Tiempo Total:</strong> <strong>14.62 s</strong> (<strong>342.0 órdenes/seg</strong> y <strong>1 645 filas/seg</strong>).
+- <strong>Validación de Concurrencia:</strong> <strong>0 franjas con sobreventa</strong> (capacidad respetada al 100%).</p>
+<hr />
+<h2 id="5-benchmark-de-consultas-patron-q1-q5-c5">5. Benchmark de Consultas Patrón Q1 – Q5 (C5)</h2>
+<p><img alt="Latencias p50 de Consultas Q1 - Q5" src="datos/output/grafica_latencias_consultas.png" />
+<em>Figura 6: Comparativa de Latencia p50 (ms) para las Consultas Q1 a Q5 en Escenarios Frío vs. Caliente (Escala Logarítmica - 200 iteraciones).</em></p>
+<p>Se ejecutaron <strong>200 iteraciones</strong> por cada consulta para medir los percentiles <strong>p50, p95 y p99</strong> en milisegundos con reloj monotónico de alta resolución (<code>time.perf_counter</code>), comparando el escenario de <strong>Parámetro Frío</strong> (proveedor de cola larga, <code>proveedor_id = 50000</code>) frente al <strong>Parámetro Caliente</strong> (superproveedor top 1%, <code>proveedor_id = 1</code>):</p>
+<h3 id="tabla-resumen-de-latencias-p50-p95-p99-en-ms">Tabla Resumen de Latencias (p50, p95, p99 en $ms$)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">ID</th>
+<th style="text-align: left;">Descripción de Consulta</th>
+<th style="text-align: center;">Escenario</th>
+<th style="text-align: left;">Parametrización Real</th>
+<th style="text-align: center;">p50 ($ms$)</th>
+<th style="text-align: center;">p95 ($ms$)</th>
+<th style="text-align: center;">p99 ($ms$)</th>
+<th style="text-align: center;">Promedio ($ms$)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>Q1</strong></td>
+<td style="text-align: left;">Validar proveedor y contrato vigente</td>
+<td style="text-align: center;">Frío</td>
+<td style="text-align: left;"><code>proveedor_id = 50000</code></td>
+<td style="text-align: center;"><strong>0.081</strong></td>
+<td style="text-align: center;"><strong>0.292</strong></td>
+<td style="text-align: center;"><strong>0.399</strong></td>
+<td style="text-align: center;">0.115</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q1</strong></td>
+<td style="text-align: left;">Validar proveedor y contrato vigente</td>
+<td style="text-align: center;">Caliente</td>
+<td style="text-align: left;"><code>proveedor_id = 1</code></td>
+<td style="text-align: center;"><strong>0.085</strong></td>
+<td style="text-align: center;"><strong>0.374</strong></td>
+<td style="text-align: center;"><strong>0.431</strong></td>
+<td style="text-align: center;">0.136</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q2</strong></td>
+<td style="text-align: left;">20 SKU del catálogo negociado</td>
+<td style="text-align: center;">Frío</td>
+<td style="text-align: left;"><code>proveedor_id = 50000</code></td>
+<td style="text-align: center;"><strong>0.150</strong></td>
+<td style="text-align: center;"><strong>0.425</strong></td>
+<td style="text-align: center;"><strong>0.486</strong></td>
+<td style="text-align: center;">0.203</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q2</strong></td>
+<td style="text-align: left;">20 SKU del catálogo negociado</td>
+<td style="text-align: center;">Caliente</td>
+<td style="text-align: left;"><code>proveedor_id = 1</code></td>
+<td style="text-align: center;"><strong>0.207</strong></td>
+<td style="text-align: center;"><strong>0.620</strong></td>
+<td style="text-align: center;"><strong>0.671</strong></td>
+<td style="text-align: center;">0.260</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q3</strong></td>
+<td style="text-align: left;">Franjas disponibles CEDI por fecha</td>
+<td style="text-align: center;">Frío</td>
+<td style="text-align: left;"><code>cedi_id = 1, 2024-05-15</code></td>
+<td style="text-align: center;"><strong>0.106</strong></td>
+<td style="text-align: center;"><strong>0.215</strong></td>
+<td style="text-align: center;"><strong>0.446</strong></td>
+<td style="text-align: center;">0.121</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q3</strong></td>
+<td style="text-align: left;">Franjas disponibles CEDI por fecha</td>
+<td style="text-align: center;">Caliente</td>
+<td style="text-align: left;"><code>cedi_id = 1, 2025-12-31</code> (pico)</td>
+<td style="text-align: center;"><strong>0.066</strong></td>
+<td style="text-align: center;"><strong>0.322</strong></td>
+<td style="text-align: center;"><strong>0.376</strong></td>
+<td style="text-align: center;">0.102</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q4</strong></td>
+<td style="text-align: left;">OTIF / Fill Rate 24 meses (Analítica)</td>
+<td style="text-align: center;">Frío</td>
+<td style="text-align: left;"><code>proveedor_id = 50000</code> (4 órdenes)</td>
+<td style="text-align: center;"><strong>0.692</strong></td>
+<td style="text-align: center;"><strong>0.957</strong></td>
+<td style="text-align: center;"><strong>1.078</strong></td>
+<td style="text-align: center;">0.705</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q4</strong></td>
+<td style="text-align: left;">OTIF / Fill Rate 24 meses (Analítica)</td>
+<td style="text-align: center;">Caliente</td>
+<td style="text-align: left;"><code>proveedor_id = 1</code> (<strong>30 880 órdenes</strong>)</td>
+<td style="text-align: center;"><strong>203.285</strong></td>
+<td style="text-align: center;"><strong>220.451</strong></td>
+<td style="text-align: center;"><strong>235.644</strong></td>
+<td style="text-align: center;">204.440</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q5</strong></td>
+<td style="text-align: left;">Últimas 50 órdenes paginadas</td>
+<td style="text-align: center;">Frío</td>
+<td style="text-align: left;"><code>proveedor_id = 50000</code></td>
+<td style="text-align: center;"><strong>0.063</strong></td>
+<td style="text-align: center;"><strong>0.247</strong></td>
+<td style="text-align: center;"><strong>0.308</strong></td>
+<td style="text-align: center;">0.104</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q5</strong></td>
+<td style="text-align: left;">Últimas 50 órdenes paginadas</td>
+<td style="text-align: center;">Caliente</td>
+<td style="text-align: left;"><code>proveedor_id = 1</code> (<strong>30 880 órdenes</strong>)</td>
+<td style="text-align: center;"><strong>0.390</strong></td>
+<td style="text-align: center;"><strong>0.920</strong></td>
+<td style="text-align: center;"><strong>1.036</strong></td>
+<td style="text-align: center;">0.468</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<strong>Cumplimiento de SLA:</strong> Q1 responde consistentemente en <strong>0.08 ms (p50)</strong>, cumpliendo con creces el umbral exigido de $&lt; 10\text{ ms}$. Las consultas OLTP de punto y lote (Q1, Q2, Q3, Q5) responden todas por debajo de $1\text{ ms}$.</p>
+</blockquote>
+<hr />
+<h2 id="6-analisis-de-planes-de-ejecucion-explain-analyze-buffers">6. Análisis de Planes de Ejecución <code>EXPLAIN (ANALYZE, BUFFERS)</code></h2>
+<p>Se capturaron y persistieron los planes completos en <code>datos/output/explain/</code>:</p>
+<h3 id="a-consulta-q5-ultimas-50-ordenes-del-proveedor-hot-paginacion">A. Consulta Q5: Últimas 50 Órdenes del Proveedor Hot (Paginación)</h3>
+<pre><code class="language-sql">SELECT id, numero_orden, proveedor_id, fecha_orden, estado, total
+FROM ordenes.orden_compra
+WHERE proveedor_id = 1
+ORDER BY fecha_orden DESC
+LIMIT 50;
+</code></pre>
+<h4 id="comparativa-antes-vs-despues-del-indice-idx_orden_proveedor_fecha">Comparativa Antes vs. Después del Índice <code>idx_orden_proveedor_fecha</code>:</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Métrica del Plan</th>
+<th style="text-align: center;">Antes del Índice</th>
+<th style="text-align: center;">Después de <code>idx_orden_proveedor_fecha</code></th>
+<th style="text-align: center;">Mejora Observable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Método de Scan</strong></td>
+<td style="text-align: center;">Index Scan sobre <code>idx_orden_fecha</code> con Filtro</td>
+<td style="text-align: center;">Index Scan Backward sobre <code>idx_orden_proveedor_fecha</code></td>
+<td style="text-align: center;">Búsqueda directa compuesta</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tuplas Descartadas por Filtro</strong></td>
+<td style="text-align: center;"><strong>4 063 filas</strong></td>
+<td style="text-align: center;"><strong>0 filas</strong></td>
+<td style="text-align: center;">100% selectividad</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Buffers Leídos (Páginas)</strong></td>
+<td style="text-align: center;"><strong>3 869 páginas</strong> (3605 hit + 264 read)</td>
+<td style="text-align: center;"><strong>53 páginas</strong> (52 hit + 1 read)</td>
+<td style="text-align: center;"><strong>-98.6% I/O</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tiempo de Ejecución</strong></td>
+<td style="text-align: center;"><strong>2.507 ms</strong></td>
+<td style="text-align: center;"><strong>0.094 ms</strong></td>
+<td style="text-align: center;"><strong>26.6x más rápido</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Archivos de evidencia completa:</em> <a href="datos/output/explain/q5_antes_indices.txt"><code>datos/output/explain/q5_antes_indices.txt</code></a> y <a href="datos/output/explain/q5_despues_idx_orden_proveedor_fecha.txt"><code>datos/output/explain/q5_despues_idx_orden_proveedor_fecha.txt</code></a>.</p>
+<hr />
+<h3 id="b-consulta-q4-otif-y-fill-rate-por-proveedor-analitica-pesada">B. Consulta Q4: OTIF y Fill Rate por Proveedor (Analítica Pesada)</h3>
+<pre><code class="language-sql">SELECT o.proveedor_id, DATE_TRUNC('month', o.fecha_orden) AS mes,
+       COUNT(DISTINCT o.id) AS total_ordenes,
+       COUNT(DISTINCT CASE WHEN o.estado = 'ENTREGADA' AND o.fecha_entrega IS NOT NULL 
+                           AND o.fecha_compromiso_entrega IS NOT NULL 
+                           AND o.fecha_entrega &lt;= o.fecha_compromiso_entrega THEN o.id END) AS ordenes_otif,
+       ROUND(COUNT(DISTINCT CASE WHEN o.estado = 'ENTREGADA' AND o.fecha_entrega IS NOT NULL 
+                                 AND o.fecha_compromiso_entrega IS NOT NULL 
+                                 AND o.fecha_entrega &lt;= o.fecha_compromiso_entrega THEN o.id END)::NUMERIC 
+             / NULLIF(COUNT(DISTINCT o.id), 0) * 100, 2) AS porcentaje_otif,
+       COALESCE(SUM(l.cantidad_recibida), 0) AS total_recibido,
+       COALESCE(SUM(l.cantidad), 0) AS total_solicitado,
+       ROUND(COALESCE(SUM(l.cantidad_recibida), 0)::NUMERIC / NULLIF(COALESCE(SUM(l.cantidad), 0), 0) * 100, 2) AS fill_rate_porcentaje
+FROM ordenes.orden_compra o
+JOIN ordenes.linea_orden l ON l.orden_id = o.id
+WHERE o.proveedor_id = 1 AND o.fecha_orden &gt;= '2024-01-01' AND o.fecha_orden &lt;= '2025-12-31'
+GROUP BY o.proveedor_id, DATE_TRUNC('month', o.fecha_orden)
+ORDER BY mes;
+</code></pre>
+<h4 id="comparativa-antes-vs-despues-de-idx_linea_orden">Comparativa Antes vs. Después de <code>idx_linea_orden</code>:</h4>
+<ul>
+<li><strong>Antes (Estado Base sin índice de líneas):</strong> PostgreSQL se ve obligado a realizar un <strong><code>Parallel Seq Scan on ordenes.linea_orden</code></strong> escaneando los <strong>3.000.000 de registros</strong> de la tabla, con derrame a disco en archivos temporales (<code>Sort Method: external merge Disk: 3704kB</code>, <code>temp read=1380 written=1383</code>), tardando <strong>341.25 ms</strong>.</li>
+<li><strong>Después (Con <code>idx_linea_orden</code> e <code>idx_orden_proveedor_fecha</code>):</strong> El optimizador sustituye el escaneo secuencial por un <strong><code>Bitmap Index Scan</code></strong> en órdenes seguido de un <strong><code>Index Scan using idx_linea_orden</code></strong> repetido para las líneas del proveedor. El tiempo de ejecución desciende a <strong>228.89 ms</strong> (reducción del 33%).</li>
+</ul>
+<p><em>Archivos de evidencia completa:</em> <a href="datos/output/explain/q4_antes_indices.txt"><code>datos/output/explain/q4_antes_indices.txt</code></a> y <a href="datos/output/explain/q4_despues_idx_linea_orden.txt"><code>datos/output/explain/q4_despues_idx_linea_orden.txt</code></a>.</p>
+<hr />
+<h2 id="7-el-hallazgo-incomodo-medido-con-el-dataset-objetivo">7. El Hallazgo Incómodo (Medido con el Dataset Objetivo)</h2>
+<blockquote>
+<p>[!WARNING]
+<strong>El Hallazgo Incómodo:</strong> Un índice compuesto en la base de datos <strong>NO resuelve el problema de escalabilidad en consultas analíticas sobre particiones calientes (Hot Partitions)</strong>.</p>
+</blockquote>
+<h3 id="el-experimento-y-la-evidencia">El Experimento y la Evidencia</h3>
+<p>Al medir la consulta analítica <strong>Q4 (OTIF / Fill Rate)</strong>:
+- En un <strong>proveedor frío (cola larga)</strong> con 4 órdenes: La consulta tarda <strong>0.69 ms</strong> (p50).
+- En el <strong>superproveedor caliente (top 1%)</strong> con 30 880 órdenes y 184 691 líneas de detalle: La consulta tarda <strong>203.28 ms</strong> (p50) y <strong>235.64 ms</strong> (p99).</p>
+<p><strong>¡Es una degradación de latencia de 294 veces más lento en la misma base de datos con los mismos índices creados y optimizados!</strong></p>
+<pre><code>Latencia Q4 Frío (4 órdenes):       [█] 0.69 ms
+Latencia Q4 Caliente (30,880 ord.): [██████████████████████████████████████████████████] 203.28 ms  (294x más lento)
+</code></pre>
+<h3 id="explicacion-fisica-y-decision-de-diseno">Explicación Física y Decisión de Diseño</h3>
+<p>Al inspeccionar <code>EXPLAIN (ANALYZE, BUFFERS)</code> comprobamos que los índices operan a la perfección. Sin embargo:
+1. <strong>Volumen Físico de Tuplas:</strong> Para calcular el indicador mensual, el motor debe inspeccionar en memoria <strong>184 691 líneas de orden</strong> y acumular <strong>100 821 buffer hits</strong> en memoria RAM.
+2. <strong>Costo de CPU en Agregación:</strong> El costo dominante es la construcción de los hashes de agregación (<code>GroupAggregate</code> y <code>Sort</code>), los cuales deben agrupar mes por mes y calcular sumas y conteos distintos sobre casi 200 mil tuplas.
+3. <strong>Decisión de Arquitectura:</strong> Para las siguientes entregas (Entrega 3 y 4), las consultas OLAP sobre proveedores calientes <strong>no deben competir con el flujo OLTP en caliente</strong>. Se adoptará una <strong>Tabla Proyectada de Analítica (Read Model Proyectado)</strong> o Vista Materializada refrescada asíncronamente mediante eventos de dominio (<code>OrdenConfirmada</code> / <code>OrdenEntregada</code> del patrón Outbox).</p>
+<hr />
+<h2 id="8-reproducibilidad-y-verificacion-en-maquina-limpia-c6">8. Reproducibilidad y Verificación en Máquina Limpia (C6)</h2>
+<p>El entregable cuenta con orquestación completa en <code>Makefile</code>:
+- <strong>Arranque con Healthcheck (<code>make db-up</code>):</strong> Levanta Docker Compose y verifica que PostgreSQL esté listo para recibir conexiones.
+- <strong>Flujo Completo con un Solo Comando (<code>make datos</code>):</strong> Ejecuta de extremo a extremo:
+  1. <code>db-up</code> (Verificación y arranque de BD)
+  2. <code>db-reset</code> (Esquema limpio con <code>modelo-fisico.sql</code>)
+  3. <code>generar</code> (Generación determinista masiva a CSV)
+  4. <code>determinismo</code> (Validación de hashes con 2 corridas independientes)
+  5. <code>cargar</code> (COPY masivo, ANALYZE baseline, índices secundarios y ANALYZE final)
+  6. <code>verificar</code> (Auditoría en PostgreSQL de los 25 checks)
+  7. <code>benchmark-carga</code> (Comparativa de 4 estrategias sobre muestra común)
+  8. <code>carga-incremental</code> (5 000 órdenes adicionales vía ruta real de negocio)
+  9. <code>benchmark-queries</code> (200 iteraciones Q1-Q5 y generación de planes EXPLAIN)
+  10. <code>graficas</code> (Generación de las 6 figuras PNG y CSVs de datos)
+- <strong>Prueba en Entorno Aislado Limpio (<code>make clean-test</code>):</strong> Despliega un proyecto Docker y volumen temporal aislado (<code>entregable2_clean_*</code>), ejecuta todo el pipeline desde cero y conserva el log íntegro en <code>datos/output/logs/clean_test.log</code>.</p>
+<hr />
+<h2 id="9-conclusiones-y-resumen-de-cumplimiento">9. Conclusiones y Resumen de Cumplimiento</h2>
+<ol>
+<li><strong>Cumplimiento al 100% de la Rúbrica:</strong> Se superó el volumen objetivo con <strong>5.66 millones de filas</strong>, separación de 4 esquemas sin JOIN inter-esquema, y determinismo probado.</li>
+<li><strong>Eficiencia de Inyección:</strong> COPY masivo alcanzó <strong>58 415 filas/seg</strong>, demostrando ser 38.6 veces más veloz que el antipatrón de autocommit (967 filas/seg).</li>
+<li><strong>Validación de Negocio:</strong> La ruta transaccional procesó 5.000 órdenes adicionales respetando contratos, catálogo y franjas con 0 sobreventas.</li>
+<li><strong>Evidencia Cruda y Planes:</strong> Toda la evidencia cruda en JSON, CSV y TXT está disponible en <code>datos/output/</code> para verificación independiente.</li>
+</ol>
+</div>
+</body>
+</html>
