@@ -10,7 +10,7 @@
 
 ---
 
-## 🏛️ Descripción del Proyecto
+## Descripción del Proyecto
 
 El **Portal B2B Retail** es un sistema de integración y aprovisionamiento entre un operador masivo de comercio y su red de proveedores comerciales. A lo largo del semestre, el sistema se diseñó, implementó, escaló y sometió a ingeniería de caos bajo los más altos estándares de arquitectura de software y datos:
 
@@ -20,7 +20,7 @@ El **Portal B2B Retail** es un sistema de integración y aprovisionamiento entre
 
 ---
 
-## 📂 Estructura Unificada del Repositorio
+## Estructura Unificada del Repositorio
 
 El repositorio se encuentra estrictamente organizado en dos niveles: los **Entregables Oficiales** (documentos de diseño e informes técnicos) y el **Código Fuente de los Talleres**:
 
@@ -68,7 +68,7 @@ Sistemas-Escalables/
 
 ---
 
-## 📑 Resumen de Entregables e Informes Técnicos
+## Resumen de Entregables e Informes Técnicos
 
 | Entregable | Formato Principal | Ruta en el Repositorio | Descripción / Hito Evaluativo |
 | :--- | :---: | :--- | :--- |
@@ -78,7 +78,7 @@ Sistemas-Escalables/
 
 ---
 
-## 🔬 Matriz de Experimentos de Caos (Entrega 3)
+## Matriz de Experimentos de Caos (Entrega 3)
 
 | Familia de Falla | Inyección Aplicada | Mitigación Implementada | Evidencia Cuantitativa |
 | :--- | :--- | :--- | :--- |
@@ -89,7 +89,7 @@ Sistemas-Escalables/
 
 ---
 
-## 📊 Demostración Cuantitativa de Mejora ($\ge 10\%$)
+## Demostración Cuantitativa de Mejora ($\ge 10\%$)
 
 | Caso / Consulta Crítica | Línea Base E2 (p50) | Umbral Requerido ($\le 0.90 \times \text{E2}$) | Resultado Medido (E3) | Reducción Real | Mecanismo de Optimización |
 | :--- | :---: | :---: | :---: | :---: | :--- |
@@ -98,7 +98,7 @@ Sistemas-Escalables/
 
 ---
 
-## 🛠️ Guía Rápida de Comandos (Master Makefile)
+## Guía Rápida de Comandos (Master Makefile)
 
 El archivo [`Makefile`](Makefile) en la raíz del repositorio permite controlar cualquier fase del proyecto:
 
@@ -135,7 +135,7 @@ make t1-cluster-down    # Detiene clúster de Taller 1
 
 ---
 
-## 🌐 URLs de Acceso a Servicios Locales
+## URLs de Acceso a Servicios Locales
 
 Una vez iniciado el stack de Entrega 3 (`make t3-up`), las consolas de observabilidad están disponibles en:
 
@@ -150,10 +150,3 @@ Una vez iniciado el stack de Entrega 3 (`make t3-up`), las consolas de observabi
 | **PostgreSQL con Toxiproxy** | `localhost:25432` | Canal controlado para simulación de degradaciones |
 
 ---
-
-## 👥 Autores y Contacto
-
-- **Sara López Marín** — *slopezm@eafit.edu.co*
-- **Luis Alejandro Castrillón Pulgarin** — *lacastrilp@eafit.edu.co*
-
-Universidad EAFIT · Medellín, Colombia · 2026.
