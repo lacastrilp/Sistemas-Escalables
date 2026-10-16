@@ -1,206 +1,101 @@
-## Q1 — Proveedor + contrato actual
+# Taller 3 — Laboratorio de Caos, Inyección de Fallas y Observabilidad (Portal B2B Retail)
 
-Necesitamos consultar:
-
-> ¿Cuál es el contrato vigente de este proveedor en determinada fecha?
-
-La consulta será conceptualmente:
-
-```sql
-SELECT
-    p.id,
-    p.nit,
-    p.nombre,
-    c.id AS contrato_id,
-    c.fecha_inicio,
-    c.fecha_fin,
-    c.estado
-FROM proveedores.proveedor p
-JOIN proveedores.contrato_suministro c
-    ON c.proveedor_id = p.id
-WHERE p.id = 12345
-  AND DATE '2026-09-18'
-      BETWEEN c.fecha_inicio AND c.fecha_fin;
-```
-
-**Ojo:** este JOIN está permitido porque ambas tablas están dentro de `proveedores`.
-
-Nuestro índice:
-
-```sql
-CREATE INDEX idx_contrato_proveedor
-ON proveedores.contrato_suministro(proveedor_id);
-```
-
-ayudará aquí.
+**Curso:** Aplicaciones y Sistemas Escalables  
+**Institución:** Universidad EAFIT · Semestre 2026-2  
+**Equipo:** Grupo EKS — Sara López Marín & Luis Alejandro Castrillón Pulgarin  
+**Entregable Oficial:** [`entregables/Entrega 3 - Caos y Observabilidad/`](../entregables/Entrega%203%20-%20Caos%20y%20Observabilidad/)
 
 ---
 
-# Q2 — 20 SKU negociados
+## 📋 Descripción General
 
-Necesitamos:
+Este taller constituye **El Corazón del Proyecto**, transformando la arquitectura de datos del Portal B2B Retail construida en el Entregable 2 en un sistema resiliente, observable y tolerante a fallas.
 
-> Obtener 20 SKU negociados para un proveedor.
-
-Por ejemplo:
-
-```sql
-SELECT
-    ps.sku_id,
-    s.codigo,
-    s.nombre,
-    ps.precio_negociado
-FROM catalogo.proveedor_sku ps
-JOIN catalogo.sku s
-    ON s.id = ps.sku_id
-WHERE ps.proveedor_id = 12345
-  AND ps.estado = 'ACTIVO'
-ORDER BY ps.sku_id
-LIMIT 20;
-```
-
-También es un JOIN **interno al schema `catalogo`**, así que está bien.
-
-Nuestro índice:
-
-```sql
-CREATE INDEX idx_proveedor_sku_proveedor
-ON catalogo.proveedor_sku(proveedor_id);
-```
-
-será importante.
+Se diseñó e implementó un **Laboratorio de Caos** completamente parametrizado que inyecta fallas en caliente sin requerir reinicio de contenedores ni redespliegues de código, monitoreado en tiempo real con observabilidad moderna:
+- **Toxiproxy (v2.9.0):** Inyección de degradaciones de red (latencias y cortes de enlace).
+- **OpenTelemetry + Jaeger (v1.57):** Rastreo distribuido de spans para visualización de cuellos de botella y fall-backs.
+- **Prometheus (v2.53.0):** Recolección continua de métricas RED (Rate, Errors, Duration) expuestas en `:9464`.
+- **Grafana (v11.1.0):** Paneles de visualización unificados de telemetría y salud del sistema.
+- **Kill Switch Maestro:** Mecanismo reversible en menos de 1 segundo para restaurar el estado nominal del sistema.
 
 ---
 
-# Q3 — Franjas disponibles de CEDI
+## 🔬 Matriz de Experimentos de Caos
 
-La consulta busca:
-
-> Franjas de descargue disponibles para un CEDI en determinada fecha.
-
-Por ejemplo:
-
-```sql
-SELECT
-    id,
-    fecha,
-    hora_inicio,
-    hora_fin,
-    capacidad,
-    reservados
-FROM logistica.franja_descargue
-WHERE cedi_id = 10
-  AND fecha = DATE '2026-09-18'
-  AND estado = 'DISPONIBLE'
-  AND reservados < capacidad
-ORDER BY hora_inicio;
-```
-
-Aquí el índice:
-
-```sql
-CREATE INDEX idx_franja_cedi_fecha
-ON logistica.franja_descargue(cedi_id, fecha);
-```
-
-tiene bastante sentido.
+| Familia | Escenario / Falla Inyectada | Mitigación Arquitectural | Resultado y Aprendizaje Clave |
+| :--- | :--- | :--- | :--- |
+| **1. Red** | Inyección de latencia estocástica de 150 ms en enlace PostgreSQL vía Toxiproxy. | Enrutamiento directo o Kill Switch de bypass de proxy. | Latencia p50 subió a 152.57 ms. El Kill Switch restauró la latencia a 1.25 ms en 0.35 s sin downtime. |
+| **2. Dependencias** | Simulación de degradación en servicio de Catálogo con timeout forzado (2000 ms). | Circuit Breaker adaptativo (`fail-fast`) con apertura al 2do fallo. | Latencia bajo falla bajó de 2000 ms a 0.08 ms (aceleración de **76.5x**), evitando saturación de hilos. |
+| **3. Recursos** | Inanición de conexiones en el Connection Pool (4 conexiones zombi bloqueadas). | Manejo explícito de `PoolAgotadoError` y reciclaje forzado de pool. | Carga incremental falló con 63.3% de errores controlados. El reciclaje restauró el throughput inmediatamente. |
+| **4. Estado de Datos** | Transacción bloqueante `FOR UPDATE` sobre proveedor caliente 1. | Configuración de `lock_timeout = '300ms'` y Exponential Backoff. | Las 30 transacciones concurrentes absorbieron 7 reintentos sin bloqueo indefinido y con 0 mutaciones no deseadas. |
 
 ---
 
-# Q4 — OTIF + Fill Rate
+## 📈 Demostración Formal de Mejora ($\ge 10\%$)
 
-Esta será probablemente nuestra consulta más pesada.
-
-Necesitamos analizar los últimos **24 meses** y obtener métricas por proveedor/mes.
-
-Para esto necesitamos utilizar:
-
-```text
-orden_compra
-      │
-      ▼
-linea_orden
-```
-
-La idea será calcular:
-
-### OTIF
-
-Orden entregada:
-
-```text
-On Time + In Full
-```
-
-es decir, que:
-
-```text
-fecha_recepcion <= fecha_entrega
-```
-
-y la cantidad recibida sea suficiente.
-
-### Fill Rate
-
-Conceptualmente:
-
-```text
-cantidad_recibida / cantidad_solicitada
-```
-
-Esta consulta nos servirá especialmente para demostrar el comportamiento de una consulta analítica frente al crecimiento de:
-
-```text
-500.000 órdenes
-3.000.000 líneas
-```
-
-Aquí **no quiero optimizarla todavía**.
-
-Primero vamos a tener la consulta funcionando.
+| Consulta / Caso Crítico | Línea Base E2 (p50) | Target Objetivo ($\le 0.90 \times \text{E2}$) | Resultado Optimizado (E3) | Mejora Obtenida | Mecanismo de Optimización |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Q1 — Contrato Vigente** | $0.0833\text{ ms}$ | $\le 0.0750\text{ ms}$ | **$0.0018\text{ ms}$** | **$97.8\%$ de reducción** | Caché L1 en memoria (LRU Cache con TTL invalidable). |
+| **Q4 — OTIF y Fill Rate** | $203.28\text{ ms}$ | $\le 182.95\text{ ms}$ | **$0.2046\text{ ms}$** | **$99.9\%$ de reducción** | Read Model pre-agregado indexado (`ordenes.resumen_otif_mensual`). |
 
 ---
 
-# Q5 — Últimas 50 órdenes del proveedor caliente
-
-Esta es particularmente importante por la distribución Zipf.
-
-Queremos tener un proveedor que tenga:
+## 📂 Estructura de Directorios
 
 ```text
-≥ 5.000 órdenes
+Taller 3/
+├── datos/
+│   ├── config_fallas.json          # Archivo de configuración en caliente del motor de caos
+│   ├── motor_fallas.py             # Motor de inyección con Circuit Breaker, zombies y locks
+│   ├── telemetria.py               # Instrumentación OpenTelemetry y exportador Prometheus (:9464)
+│   ├── consultas.py                # Consultas Q1-Q5 con mitigaciones y socket / TCP resiliente
+│   ├── experimentos_e3.py          # Runner automatizado de la suite experimental de caos
+│   ├── carga_incremental_e3.py     # Transacciones concurrentes instrumentadas con caos
+│   ├── benchmark_queries_e3.py     # Benchmarking de latencias con trazabilidad OTel
+│   └── output/e3/                  # Evidencias experimentales, CSVs y JSONs generados
+├── observabilidad/
+│   ├── toxiproxy/                  # Configuración del proxy para PostgreSQL (:25432)
+│   ├── prometheus/                 # Scraping job de métricas cada 2 segundos
+│   └── grafana/                    # Aprovisionamiento automático de datasources (Prometheus & Jaeger)
+├── docker-compose.yml              # Stack completo (PostgreSQL, Toxiproxy, Jaeger, Prometheus, Grafana)
+├── requirements-e3.txt             # Dependencias Python requeridas (OTel, Prometheus, Psycopg2)
+├── modelo-fisico.sql               # DDL físico de los 4 esquemas
+├── convertir_informe_e3_html.py    # Generador de informe HTML profesional
+├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.md    # Informe técnico oficial
+├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.html  # Versión visual lista para evaluación
+└── Makefile                        # Automatización completa de comandos de Entrega 3
 ```
-
-y posteriormente ejecutar:
-
-```sql
-SELECT
-    id,
-    numero_orden,
-    proveedor_id,
-    fecha_orden,
-    estado,
-    total
-FROM ordenes.orden_compra
-WHERE proveedor_id = 1
-ORDER BY fecha_orden DESC
-LIMIT 50;
-```
-
-Nuestro índice:
-
-```sql
-CREATE INDEX idx_orden_proveedor_fecha
-ON ordenes.orden_compra(proveedor_id, fecha_orden);
-```
-
-está pensado precisamente para este patrón.
 
 ---
 
+## 🚀 Guía de Reproducción Rápida
 
+Todos los experimentos se ejecutan mediante el [`Makefile`](Makefile):
 
+```bash
+cd "Taller 3"
 
+# 1. Levantar el stack completo de observabilidad y base de datos
+make e3-up
 
+# 2. Consultar el estado de salud de los servicios y configuración de fallas
+make e3-status
 
+# 3. Ejecutar la suite completa de caos y optimizaciones
+make e3-todo
 
+# 4. Generar el informe técnico actualizado en HTML
+make e3-informe
+
+# 5. En caso de emergencia, activar el kill switch maestro
+make e3-killswitch
+```
+
+### Puertos de Acceso a las Interfaces Web
+- **Grafana:** `http://localhost:3000` *(admin / admin)*
+- **Jaeger Tracing:** `http://localhost:16686`
+- **Prometheus UI:** `http://localhost:9090`
+- **Toxiproxy API:** `http://localhost:8474`
+- **Prometheus Python Metrics:** `http://localhost:9464/metrics`
+- **PostgreSQL Directo:** `localhost:5435`
+- **PostgreSQL vía Toxiproxy:** `localhost:25432`

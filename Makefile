@@ -1,127 +1,150 @@
 # ============================================================
-# MAKEFILE - PORTAL B2B RETAIL (ENTREGABLE 2: ESCALABILIDAD DE DATOS)
-# Universidad EAFIT · Aplicaciones y Sistemas Escalables
+# MASTER MAKEFILE - REPOSITORIO DE SISTEMAS ESCALABLES
+# Universidad EAFIT · Aplicaciones y Sistemas Escalables (2026-2)
+# Grupo EKS · Sara López Marín & Luis Alejandro Castrillón Pulgarin
 # ============================================================
 
-.PHONY: all db-up db-reset generar determinismo cargar verificar benchmark-carga carga-incremental benchmark-queries graficas benchmark datos clean clean-test help
+.PHONY: help all \
+        t1-help t1-standalone-up t1-standalone-down t1-cluster-up t1-cluster-down \
+        t2-help t2-up t2-datos t2-verificar t2-benchmark t2-informe t2-down \
+        t3-help t3-up t3-down t3-status t3-killswitch t3-m1 t3-exp1 t3-exp2 t3-exp3 t3-exp4 t3-mejora t3-todo t3-informe \
+        e3-up e3-down e3-status e3-killswitch e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-informe
 
-PYTHON ?= python3
-SHELL  := /usr/bin/env bash
+SHELL := /usr/bin/env bash
 .SHELLFLAGS := -euo pipefail -c
 
-CONTAINER_NAME ?= entregable2-postgres
-DB_USER        ?= retail
-DB_NAME        ?= retail
-
-all: datos
+all: help
 
 help:
-	@echo "======================================================================"
-	@echo " COMANDOS DISPONIBLES - ENTREGABLE 2 (ESCALABILIDAD DE DATOS)"
-	@echo "======================================================================"
-	@echo "  make db-up              - Levanta PostgreSQL con Docker Compose y espera healthcheck"
-	@echo "  make db-reset           - Resetea los 4 esquemas de la BD ejecutando modelo-fisico.sql"
-	@echo "  make generar            - Genera los datos sintéticos masivos a CSV con Zipf y casos borde"
-	@echo "  make determinismo       - Demuestra determinismo estricto comparando 2 corridas independientes"
-	@echo "  make cargar             - Carga masivamente los CSVs con COPY, ANALYZE e índices secundarios"
-	@echo "  make verificar          - Audita volúmenes en BD, esquemas, Zipf, estacionalidad y casos borde"
-	@echo "  make benchmark-carga    - Evalúa las 4 estrategias de inyección sobre 50.000 órdenes"
-	@echo "  make carga-incremental  - Inserta 5.000 órdenes adicionales vía ruta transaccional real"
-	@echo "  make benchmark-queries  - Mide latencias p50/p95/p99 y genera EXPLAIN (ANALYZE, BUFFERS) Q1-Q5"
-	@echo "  make graficas           - Genera las figuras PNG y CSVs de datos para el informe técnico"
-	@echo "  make datos              - Flujo integral: levanta, resetea, genera, carga, verifica y mide"
-	@echo "  make clean-test         - Simula una máquina limpia en volumen/proyecto Docker aislado"
-	@echo "  make clean              - Detiene y elimina el contenedor y volumen de este entregable"
-	@echo "======================================================================"
+	@echo "=========================================================================================="
+	@echo " UNIVERSIDAD EAFIT - APLICACIONES Y SISTEMAS ESCALABLES (2026-2)"
+	@echo " Repositorio Central · Grupo EKS (Sara López Marín & Luis Alejandro Castrillón Pulgarin)"
+	@echo "=========================================================================================="
+	@echo " COMANDOS PRINCIPALES POR TALLER / ENTREGABLE:"
+	@echo "------------------------------------------------------------------------------------------"
+	@echo " [TALLER 1: ARQUITECTURA DE DATOS, ÍNDICES Y REPLICACIÓN]"
+	@echo "   make t1-standalone-up   - Levanta entorno Docker standalone de Taller 1"
+	@echo "   make t1-standalone-down - Detiene entorno standalone"
+	@echo "   make t1-cluster-up      - Levanta clúster primary-standby (3 nodos)"
+	@echo "   make t1-cluster-down    - Detiene clúster de Taller 1"
+	@echo ""
+	@echo " [TALLER 2: ESCALABILIDAD DE DATOS MASIVOS (5.66M REGISTROS)]"
+	@echo "   make t2-up              - Levanta PostgreSQL para Taller 2"
+	@echo "   make t2-datos           - Ejecuta pipeline completo: genera, carga, audita y benchmark"
+	@echo "   make t2-verificar       - Audita volúmenes en BD, esquemas, Zipf y casos borde"
+	@echo "   make t2-benchmark       - Ejecuta benchmarks de carga y consultas Q1 a Q5"
+	@echo "   make t2-informe         - Compila informe técnico de Entrega 2 a HTML"
+	@echo "   make t2-down            - Detiene servicio PostgreSQL de Taller 2"
+	@echo ""
+	@echo " [TALLER 3: LABORATORIO DE CAOS, INYECCIÓN DE FALLAS Y OBSERVABILIDAD]"
+	@echo "   make t3-up              - Levanta stack completo (Postgres, Toxiproxy, Jaeger, Prometheus, Grafana)"
+	@echo "   make t3-status          - Estado de contenedores Docker y configuración de fallas en caliente"
+	@echo "   make t3-killswitch      - Kill switch maestro: apaga todas las fallas en < 1 segundo"
+	@echo "   make t3-m1              - Momento 1: Línea base reproducible y tabla de metas (-10%)"
+	@echo "   make t3-exp1            - Experimento 1: Familia Red / Latencia 150ms con Toxiproxy"
+	@echo "   make t3-exp2            - Experimento 2: Familia Dependencias / Timeout Catálogo y Circuit Breaker"
+	@echo "   make t3-exp3            - Experimento 3: Familia Recursos / Inanición de Pool con Zombies"
+	@echo "   make t3-exp4            - Experimento 4: Familia Datos / Locks FOR UPDATE en Proveedor Caliente"
+	@echo "   make t3-mejora          - Demostración de Mejora del 10% (Caché LRU Q1 y Read Model Q4)"
+	@echo "   make t3-todo            - Ejecuta la suite experimental completa de E3 de extremo a extremo"
+	@echo "   make t3-informe         - Genera el informe técnico de Entrega 3 en HTML"
+	@echo "   make t3-down            - Detiene contenedores preservando el volumen de 5.66M filas"
+	@echo "=========================================================================================="
 
-db-up:
-	@echo "==> [db-up] Iniciando servicio PostgreSQL con Docker Compose..."
-	@docker compose up -d postgres
-	@echo "==> [db-up] Esperando a que PostgreSQL pase el healthcheck..."
-	@for i in {1..30}; do \
-		status=$$(docker inspect --format='{{json .State.Health.Status}}' $(CONTAINER_NAME) 2>/dev/null || echo '"starting"'); \
-		if [ "$$status" = '"healthy"' ]; then \
-			echo "    OK: PostgreSQL está listo y saludable."; \
-			exit 0; \
-		fi; \
-		sleep 1; \
-	done; \
-	echo "    ERROR: PostgreSQL no alcanzó estado saludable a tiempo."; \
-	exit 1
+# -----------------------------------------------------------------------------------------
+# Taller 1 Target Forwarding
+# -----------------------------------------------------------------------------------------
+t1-help:
+	@cat "Taller 1/README.md"
 
-db-reset: db-up
-	@echo "==> [db-reset] Reseteando esquemas base con modelo-fisico.sql..."
-	@docker exec -i $(CONTAINER_NAME) psql -U $(DB_USER) -d $(DB_NAME) < modelo-fisico.sql > /dev/null
-	@echo "    OK: Esquemas proveedores, catalogo, logistica y ordenes preparados."
+t1-standalone-up:
+	@$(MAKE) -C "Taller 1/01-standalone" -f - <<< "$$(echo -e 'all:\n\tdocker compose up -d')"
 
-generar:
-	@echo "==> [generar] Generando dataset sintético masivo a CSV (datos/generar.py)..."
-	@$(PYTHON) datos/generar.py
+t1-standalone-down:
+	@docker compose -f "Taller 1/01-standalone/docker-compose.yml" down
 
-determinismo:
-	@echo "==> [determinismo] Verificando determinismo con dos corridas independientes..."
-	@$(PYTHON) datos/verificar_determinismo.py
+t1-cluster-up:
+	@docker compose -f "Taller 1/03-cluster/docker-compose.yml" up -d
 
-cargar: db-up
-	@echo "==> [cargar] Ejecutando carga masiva con COPY y creación posterior de índices..."
-	@./datos/cargar.sh
+t1-cluster-down:
+	@docker compose -f "Taller 1/03-cluster/docker-compose.yml" down
 
-verificar: db-up
-	@echo "==> [verificar] Verificando dataset real en PostgreSQL y CSVs (datos/verificar.py)..."
-	@$(PYTHON) datos/verificar.py
+# -----------------------------------------------------------------------------------------
+# Taller 2 Target Forwarding
+# -----------------------------------------------------------------------------------------
+t2-help:
+	@$(MAKE) -C "Taller 2" help
 
-benchmark-carga: db-up
-	@echo "==> [benchmark-carga] Evaluando 4 estrategias de inyección (datos/benchmark_carga.py)..."
-	@$(PYTHON) datos/benchmark_carga.py
+t2-up:
+	@$(MAKE) -C "Taller 2" db-up
 
-carga-incremental: db-up
-	@echo "==> [carga-incremental] Inyectando 5.000 órdenes vía ruta transaccional (datos/carga_incremental.py)..."
-	@$(PYTHON) datos/carga_incremental.py
+t2-datos:
+	@$(MAKE) -C "Taller 2" datos
 
-benchmark-queries: db-up
-	@echo "==> [benchmark-queries] Midiendo Q1-Q5 y generando EXPLAINs (datos/benchmark_queries.py)..."
-	@$(PYTHON) datos/benchmark_queries.py
+t2-verificar:
+	@$(MAKE) -C "Taller 2" verificar
 
-graficas:
-	@echo "==> [graficas] Generando gráficas de evidencia en datos/output/ (datos/generar_graficas.py)..."
-	@$(PYTHON) datos/generar_graficas.py
+t2-benchmark:
+	@$(MAKE) -C "Taller 2" benchmark
 
-benchmark: benchmark-carga carga-incremental benchmark-queries
+t2-informe:
+	@$(MAKE) -C "Taller 2" informe
 
-datos: db-up db-reset generar determinismo cargar verificar benchmark graficas
-	@echo "======================================================================"
-	@echo " FLUJO COMPLETO 'make datos' EJECUTADO EXITOSAMENTE AL 100%"
-	@echo "======================================================================"
+t2-down:
+	@$(MAKE) -C "Taller 2" clean
 
-clean:
-	@echo "==> Deteniendo y eliminando contenedor y volumen de desarrollo..."
-	@docker compose down -v
-	@echo "    OK: Entorno limpio."
+# -----------------------------------------------------------------------------------------
+# Taller 3 Target Forwarding (with backward-compatible e3-* aliases)
+# -----------------------------------------------------------------------------------------
+t3-help:
+	@$(MAKE) -C "Taller 3" help
 
-clean-test:
-	@echo "======================================================================"
-	@echo " SIMULANDO EJECUCIÓN EN MÁQUINA LIMPIA (PROYECTO DOCKER AISLADO)"
-	@echo "======================================================================"
-	@mkdir -p datos/output/logs
-	@bash -c '\
-		PROJECT_CLEAN="entregable2_clean_$$RANDOM"; \
-		LOG_FILE="datos/output/logs/clean_test.log"; \
-		echo "Iniciando prueba limpia en proyecto Docker: $$PROJECT_CLEAN" | tee "$$LOG_FILE"; \
-		trap "docker compose -p $$PROJECT_CLEAN down -v >/dev/null 2>&1 || true" EXIT; \
-		docker compose -p $$PROJECT_CLEAN up -d postgres >> "$$LOG_FILE" 2>&1; \
-		echo "Esperando readiness en proyecto aislado..." | tee -a "$$LOG_FILE"; \
-		for i in {1..30}; do \
-			if docker compose -p $$PROJECT_CLEAN exec -T postgres pg_isready -U $(DB_USER) -d $(DB_NAME) >/dev/null 2>&1; then \
-				break; \
-			fi; \
-			sleep 1; \
-		done; \
-		echo "Ejecutando make datos contra el entorno limpio..." | tee -a "$$LOG_FILE"; \
-		CONTAINER_NAME="$$PROJECT_CLEAN-postgres-1" make datos >> "$$LOG_FILE" 2>&1; \
-		echo "PRUEBA LIMPIA COMPLETADA CON ÉXITO. Log guardado en $$LOG_FILE." | tee -a "$$LOG_FILE"; \
-	'
+t3-up:
+	@$(MAKE) -C "Taller 3" e3-up
 
-# Forwarding para Entregable 3
-e3-up e3-down e3-status e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-killswitch e3-informe:
-	@$(MAKE) -C "Taller 3" $@
+t3-down:
+	@$(MAKE) -C "Taller 3" e3-down
 
+t3-status:
+	@$(MAKE) -C "Taller 3" e3-status
+
+t3-killswitch:
+	@$(MAKE) -C "Taller 3" e3-killswitch
+
+t3-m1:
+	@$(MAKE) -C "Taller 3" e3-m1
+
+t3-exp1:
+	@$(MAKE) -C "Taller 3" e3-exp1
+
+t3-exp2:
+	@$(MAKE) -C "Taller 3" e3-exp2
+
+t3-exp3:
+	@$(MAKE) -C "Taller 3" e3-exp3
+
+t3-exp4:
+	@$(MAKE) -C "Taller 3" e3-exp4
+
+t3-mejora:
+	@$(MAKE) -C "Taller 3" e3-mejora
+
+t3-todo:
+	@$(MAKE) -C "Taller 3" e3-todo
+
+t3-informe:
+	@$(MAKE) -C "Taller 3" e3-informe
+
+# Backward-compatible e3-* aliases:
+e3-up: t3-up
+e3-down: t3-down
+e3-status: t3-status
+e3-killswitch: t3-killswitch
+e3-m1: t3-m1
+e3-exp1: t3-exp1
+e3-exp2: t3-exp2
+e3-exp3: t3-exp3
+e3-exp4: t3-exp4
+e3-mejora: t3-mejora
+e3-todo: t3-todo
+e3-informe: t3-informe

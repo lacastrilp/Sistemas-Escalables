@@ -1,4 +1,37 @@
-datos/__pycache__/
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-datos/.pg_socket/
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.zip
+*.tar.gz
+
+# Database local sockets & runtimes
+.pg_socket/
+*.sock
+*.lock
+*.pid
+
+# OS generated files & caches
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+desktop.ini
+.~lock.*
+
+# IDE & editors
+.vscode/
+.idea/
+*.swp
+*.swo
