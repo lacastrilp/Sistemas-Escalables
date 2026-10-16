@@ -1,0 +1,25 @@
+{
+  "id": "EXP-03-POOL",
+  "familia": "Concurrencia / Recursos",
+  "falla": "Inanición de conexiones de base de datos por conexiones zombie (4 de 5 conexiones ocupadas con pg_sleep)",
+  "configuracion": {
+    "pool_max": 5,
+    "zombies": 4,
+    "zombie_sleep_s": 15,
+    "timeout_adquisicion_s": 0.5
+  },
+  "prediccion": "Con 4 conexiones secuestradas, solo queda 1 conexión libre en el pool. 8 workers concurrentes compitiendo agotarán la capacidad; las solicitudes que no consigan conexión en 500 ms fallarán con PoolAgotadoError. Al desactivar la falla, los zombies mueren y el pool recupera su tasa normal sin errores.",
+  "resultado": {
+    "errores_falla": {},
+    "tasa_error_falla": 0.0,
+    "duracion_falla_s": 0.09,
+    "tasa_error_recuperada": 0.0,
+    "errores_recuperacion": {}
+  },
+  "evidencia": {
+    "archivo_json": "output/e3/experimento_3_pool.json",
+    "metricas_prometheus": "e3_query_errors_total{tipo='PoolAgotadoError'}",
+    "trazas_jaeger": "Spans de adquisición de pool mostrando contención"
+  },
+  "aprendizaje": "Fijar un timeout estricto de adquisición en los connection pools es fundamental; sin él, las peticiones se quedan colgadas consumiendo memoria y descriptores de archivo indefinidamente."
+}

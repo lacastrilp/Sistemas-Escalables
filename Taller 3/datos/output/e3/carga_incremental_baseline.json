@@ -1,0 +1,21 @@
+{
+  "fase": "baseline",
+  "timestamp": "2026-10-16T00:39:16.645419",
+  "intentos": 200,
+  "workers": 4,
+  "pool_max": 10,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 200
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 6.038,
+  "tx_p95_ms": 16.643,
+  "tx_p99_ms": 29.12,
+  "duracion_s": 0.38,
+  "throughput_tps": 526.1
+}

@@ -1,0 +1,21 @@
+{
+  "fase": "falla_pool_zombies",
+  "timestamp": "2026-10-16T00:39:49.168609",
+  "intentos": 30,
+  "workers": 8,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 30
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 2.407,
+  "tx_p95_ms": 71.166,
+  "tx_p99_ms": 83.171,
+  "duracion_s": 0.09,
+  "throughput_tps": 339.2
+}

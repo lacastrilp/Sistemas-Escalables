@@ -3,9 +3,9 @@
 # Universidad EAFIT · Aplicaciones y Sistemas Escalables
 # ============================================================
 
-.PHONY: all db-up db-reset generar determinismo cargar verificar benchmark-carga carga-incremental benchmark-queries graficas benchmark datos clean clean-test help
+.PHONY: all db-up db-reset generar determinismo cargar verificar benchmark-carga carga-incremental benchmark-queries graficas benchmark datos clean clean-test help e3-up e3-down e3-status e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-killswitch e3-informe
 
-PYTHON ?= python3
+PYTHON ?= $(shell which python3)
 SHELL  := /usr/bin/env bash
 .SHELLFLAGS := -euo pipefail -c
 
@@ -17,21 +17,31 @@ all: datos
 
 help:
 	@echo "======================================================================"
-	@echo " COMANDOS DISPONIBLES - ENTREGABLE 2 (ESCALABILIDAD DE DATOS)"
+	@echo " COMANDOS DISPONIBLES - ENTREGABLE 3 (EL CORAZÓN DEL PROYECTO)"
 	@echo "======================================================================"
+	@echo "  make e3-up              - Levanta el stack completo (Postgres, Toxiproxy, Jaeger, Prometheus, Grafana)"
+	@echo "  make e3-down            - Detiene contenedores preservando el volumen de 5.66M filas"
+	@echo "  make e3-status          - Estado de contenedores Docker y configuración de fallas en caliente"
+	@echo "  make e3-killswitch      - KILL SWITCH maestro: apaga todas las fallas en < 1 segundo"
+	@echo "  make e3-m1              - Momento 1: Línea base reproducible y tabla de metas (-10%)"
+	@echo "  make e3-exp1            - Experimento 1: Familia Red / Latencia 150ms con Toxiproxy"
+	@echo "  make e3-exp2            - Experimento 2: Familia Dependencias / Timeout Catálogo y Circuit Breaker"
+	@echo "  make e3-exp3            - Experimento 3: Familia Recursos / Inanición de Pool con Zombies"
+	@echo "  make e3-exp4            - Experimento 4: Familia Datos / Locks FOR UPDATE en Proveedor Caliente"
+	@echo "  make e3-mejora          - Demostración de Mejora del 10% (Caché LRU Q1 y Read Model Q4)"
+	@echo "  make e3-todo            - Ejecuta la suite experimental completa de E3 de extremo a extremo"
+	@echo "  make e3-informe         - Genera el informe técnico de Entrega 3 en HTML"
+	@echo "----------------------------------------------------------------------"
+	@echo " COMANDOS BASE ENTREGABLE 2"
+	@echo "----------------------------------------------------------------------"
 	@echo "  make db-up              - Levanta PostgreSQL con Docker Compose y espera healthcheck"
 	@echo "  make db-reset           - Resetea los 4 esquemas de la BD ejecutando modelo-fisico.sql"
 	@echo "  make generar            - Genera los datos sintéticos masivos a CSV con Zipf y casos borde"
 	@echo "  make determinismo       - Demuestra determinismo estricto comparando 2 corridas independientes"
 	@echo "  make cargar             - Carga masivamente los CSVs con COPY, ANALYZE e índices secundarios"
 	@echo "  make verificar          - Audita volúmenes en BD, esquemas, Zipf, estacionalidad y casos borde"
-	@echo "  make benchmark-carga    - Evalúa las 4 estrategias de inyección sobre 50.000 órdenes"
-	@echo "  make carga-incremental  - Inserta 5.000 órdenes adicionales vía ruta transaccional real"
-	@echo "  make benchmark-queries  - Mide latencias p50/p95/p99 y genera EXPLAIN (ANALYZE, BUFFERS) Q1-Q5"
-	@echo "  make graficas           - Genera las figuras PNG y CSVs de datos para el informe técnico"
-	@echo "  make datos              - Flujo integral: levanta, resetea, genera, carga, verifica y mide"
-	@echo "  make clean-test         - Simula una máquina limpia en volumen/proyecto Docker aislado"
-	@echo "  make clean              - Detiene y elimina el contenedor y volumen de este entregable"
+	@echo "  make benchmark          - Evalúa benchmarks de carga y consultas Q1-Q5"
+	@echo "  make datos              - Flujo integral de E2 completo"
 	@echo "======================================================================"
 
 db-up:
@@ -120,3 +130,69 @@ clean-test:
 		CONTAINER_NAME="$$PROJECT_CLEAN-postgres-1" make datos >> "$$LOG_FILE" 2>&1; \
 		echo "PRUEBA LIMPIA COMPLETADA CON ÉXITO. Log guardado en $$LOG_FILE." | tee -a "$$LOG_FILE"; \
 	'
+
+# ============================================================
+# TARGETS ENTREGABLE 3: OBSERVABILIDAD Y LABORATORIO DE FALLAS
+# ============================================================
+
+e3-up:
+	@echo "==> [e3-up] Iniciando stack completo de observabilidad y fallas..."
+	@docker compose up -d
+	@echo "==> [e3-up] Esperando healthcheck de PostgreSQL..."
+	@for i in {1..30}; do \
+		status=$$(docker inspect --format='{{json .State.Health.Status}}' $(CONTAINER_NAME) 2>/dev/null || echo '"starting"'); \
+		if [ "$$status" = '"healthy"' ]; then \
+			echo "    OK: Stack E3 activo (PostgreSQL, Toxiproxy, Jaeger, Prometheus, Grafana)."; \
+			exit 0; \
+		fi; \
+		sleep 1; \
+	done; \
+	echo "    ERROR: PostgreSQL no alcanzó estado saludable a tiempo."; exit 1
+
+e3-down:
+	@echo "==> [e3-down] Deteniendo contenedores preservando el volumen de datos..."
+	@docker compose down
+
+e3-status:
+	@echo "==> [e3-status] Estado de contenedores Docker:"
+	@docker compose ps
+	@echo "==> [e3-status] Estado de fallas configurables:"
+	@$(PYTHON) datos/motor_fallas.py status
+
+e3-killswitch:
+	@echo "==> [e3-killswitch] Activando KILL SWITCH maestro en caliente..."
+	@$(PYTHON) datos/motor_fallas.py off
+
+e3-m1: e3-up
+	@echo "==> [e3-m1] Ejecutando Momento 1: Línea base y tabla de metas (-10%)..."
+	@$(PYTHON) datos/experimentos_e3.py --m1
+
+e3-exp1: e3-up
+	@echo "==> [e3-exp1] Ejecutando Experimento 1: Familia Red (Toxiproxy Latencia 150ms)..."
+	@$(PYTHON) datos/experimentos_e3.py --exp1
+
+e3-exp2: e3-up
+	@echo "==> [e3-exp2] Ejecutando Experimento 2: Familia Dependencias (Catálogo + Circuit Breaker)..."
+	@$(PYTHON) datos/experimentos_e3.py --exp2
+
+e3-exp3: e3-up
+	@echo "==> [e3-exp3] Ejecutando Experimento 3: Familia Recursos (Pool zombies)..."
+	@$(PYTHON) datos/experimentos_e3.py --exp3
+
+e3-exp4: e3-up
+	@echo "==> [e3-exp4] Ejecutando Experimento 4: Familia Datos (Locks en Proveedor Caliente)..."
+	@$(PYTHON) datos/experimentos_e3.py --exp4
+
+e3-mejora: e3-up
+	@echo "==> [e3-mejora] Ejecutando Demostración de Mejora del 10% (Caché LRU y Read Model)..."
+	@$(PYTHON) datos/experimentos_e3.py --mejora
+
+e3-todo: e3-up
+	@echo "======================================================================"
+	@echo " EJECUTANDO SUITE COMPLETA DEL ENTREGABLE 3 (100% AUTOMATIZADO)"
+	@echo "======================================================================"
+	@$(PYTHON) datos/experimentos_e3.py --todo
+
+e3-informe:
+	@echo "==> [e3-informe] Generando informe técnico HTML de Entrega 3..."
+	@$(PYTHON) convertir_informe_e3_html.py

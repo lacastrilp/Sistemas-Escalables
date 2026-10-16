@@ -1,0 +1,11 @@
+consulta,escenario,metrica,valor_e2,objetivo_e3_max,linea_base_e3,regla
+Q1,frio,p50_ms,0.081,0.0729,0.262,Objetivo = 0.90 * Valor E2
+Q1,caliente,p50_ms,0.085,0.0765,0.2763,Objetivo = 0.90 * Valor E2
+Q2,frio,p50_ms,0.15,0.135,0.4098,Objetivo = 0.90 * Valor E2
+Q2,caliente,p50_ms,0.207,0.1863,0.4245,Objetivo = 0.90 * Valor E2
+Q3,frio,p50_ms,0.106,0.0954,0.3067,Objetivo = 0.90 * Valor E2
+Q3,caliente,p50_ms,0.066,0.0594,0.3033,Objetivo = 0.90 * Valor E2
+Q4,frio,p50_ms,0.692,0.6228,0.7446,Objetivo = 0.90 * Valor E2
+Q4,caliente,p50_ms,203.285,182.9565,209.228,Objetivo = 0.90 * Valor E2
+Q5,frio,p50_ms,0.063,0.0567,0.2151,Objetivo = 0.90 * Valor E2
+Q5,caliente,p50_ms,0.39,0.351,0.4262,Objetivo = 0.90 * Valor E2

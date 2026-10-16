@@ -120,3 +120,8 @@ clean-test:
 		CONTAINER_NAME="$$PROJECT_CLEAN-postgres-1" make datos >> "$$LOG_FILE" 2>&1; \
 		echo "PRUEBA LIMPIA COMPLETADA CON ÉXITO. Log guardado en $$LOG_FILE." | tee -a "$$LOG_FILE"; \
 	'
+
+# Forwarding para Entregable 3
+e3-up e3-down e3-status e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-killswitch e3-informe:
+	@$(MAKE) -C "Taller 3" $@
+

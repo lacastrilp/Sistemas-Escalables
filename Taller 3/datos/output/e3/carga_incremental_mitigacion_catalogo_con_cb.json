@@ -1,0 +1,21 @@
+{
+  "fase": "mitigacion_catalogo_con_cb",
+  "timestamp": "2026-10-16T00:39:43.637405",
+  "intentos": 25,
+  "workers": 4,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 25
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 15.997,
+  "tx_p95_ms": 22.781,
+  "tx_p99_ms": 26.208,
+  "duracion_s": 0.1,
+  "throughput_tps": 259.8
+}

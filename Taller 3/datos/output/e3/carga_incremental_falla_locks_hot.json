@@ -1,0 +1,21 @@
+{
+  "fase": "falla_locks_hot",
+  "timestamp": "2026-10-16T00:39:55.020761",
+  "intentos": 40,
+  "workers": 6,
+  "pool_max": 10,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 40
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 23.501,
+  "tx_p95_ms": 38.637,
+  "tx_p99_ms": 40.887,
+  "duracion_s": 0.17,
+  "throughput_tps": 238.2
+}

@@ -1,0 +1,21 @@
+{
+  "fase": "falla_catalogo_sin_cb",
+  "timestamp": "2026-10-16T00:39:41.007392",
+  "intentos": 12,
+  "workers": 4,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 12
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 12.526,
+  "tx_p95_ms": 21.512,
+  "tx_p99_ms": 22.601,
+  "duracion_s": 0.05,
+  "throughput_tps": 249.9
+}

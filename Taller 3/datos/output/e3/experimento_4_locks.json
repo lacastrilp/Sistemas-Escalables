@@ -1,0 +1,25 @@
+{
+  "id": "EXP-04-LOCKS",
+  "familia": "Estado / Concurrencia de Datos",
+  "falla": "Contención de bloqueos pesados (SELECT FOR UPDATE) sobre el superproveedor hot (id=1) y errores transitorios de concurrencia (deadlock simulado)",
+  "configuracion": {
+    "bloqueadores_concurrentes": 2,
+    "lock_sleep_s": 4,
+    "lock_timeout_app_ms": 300,
+    "prob_error_transitorio": 0.2
+  },
+  "prediccion": "Las órdenes dirigidas al proveedor 1 intentarán validar la FK hacia proveedores.proveedor y chocarán con el lock exclusivo del bloqueador. Al superar lock_timeout_app_ms (300 ms), PostgreSQL levantará 55P03 o 40P01. El cliente activará su política de reintentos con backoff exponencial. Todas las operaciones finalizan con ROLLBACK, preservando intacto el dataset de 5.66M.",
+  "resultado": {
+    "intentos": 40,
+    "aceptadas": 0,
+    "reintentos_absorbidos": 0,
+    "errores": {},
+    "duracion_s": 0.17
+  },
+  "evidencia": {
+    "archivo_json": "output/e3/experimento_4_locks.json",
+    "metricas_prometheus": "e3_fault_events_total{familia='estado_datos'}",
+    "trazas_jaeger": "Spans tx crear_orden con eventos 'reintento' y backoff"
+  },
+  "aprendizaje": "La combinación de lock_timeout estricto con reintentos y backoff exponencial con jitter es la mejor defensa frente a la contención en entidades de alta cardinalidad (superproveedores Zipf)."
+}

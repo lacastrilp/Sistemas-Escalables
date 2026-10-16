@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-10-16T00:39:57.225010",
+  "iteraciones": 100,
+  "optimizaciones": [
+    {
+      "consulta": "Q1",
+      "escenario": "frio",
+      "optimizacion": "Caché LRU en memoria",
+      "p50_e2_ms": 0.081,
+      "meta_e3_max_ms": 0.0729,
+      "p50_logrado_ms": 0.0018,
+      "mejora_porcentaje": 97.78,
+      "cumple_meta_10": true
+    },
+    {
+      "consulta": "Q1",
+      "escenario": "caliente",
+      "optimizacion": "Caché LRU en memoria",
+      "p50_e2_ms": 0.085,
+      "meta_e3_max_ms": 0.0765,
+      "p50_logrado_ms": 0.0015,
+      "mejora_porcentaje": 98.24,
+      "cumple_meta_10": true
+    },
+    {
+      "consulta": "Q4",
+      "escenario": "caliente",
+      "optimizacion": "Read Model Proyectado (resuelve hallazgo incómodo)",
+      "p50_e2_ms": 203.285,
+      "meta_e3_max_ms": 182.9565,
+      "p50_logrado_ms": 0.2046,
+      "mejora_porcentaje": 99.9,
+      "cumple_meta_10": true
+    },
+    {
+      "consulta": "Q4",
+      "escenario": "frio",
+      "optimizacion": "Read Model Proyectado",
+      "p50_e2_ms": 0.692,
+      "meta_e3_max_ms": 0.6228,
+      "p50_logrado_ms": 0.1549,
+      "mejora_porcentaje": 77.62,
+      "cumple_meta_10": true
+    }
+  ]
+}

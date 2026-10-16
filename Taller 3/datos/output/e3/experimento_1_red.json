@@ -1,0 +1,24 @@
+{
+  "id": "EXP-01-RED",
+  "familia": "Red / Infraestructura",
+  "falla": "Latencia inducida en capa de red (150 ms ± 10 ms jitter)",
+  "configuracion": {
+    "latencia_ms": 150,
+    "jitter_ms": 10,
+    "proxy_port": 25432
+  },
+  "prediccion": "La latencia p50 de Q1 aumentará de sub-milisegundo (~0.3 ms) a ~150-165 ms debido al roundtrip inducido. Al apagar el kill switch, el toxic se retira en caliente (< 2 s) y la latencia retorna a nivel baseline sin reiniciar servicios.",
+  "resultado": {
+    "latencia_con_falla_p50_ms": 152.5672,
+    "latencia_con_falla_p95_ms": 160.6631,
+    "latencia_recuperada_p50_ms": 0.7148,
+    "tiempo_reversion_s": 2.0,
+    "reversion_exitosa": true
+  },
+  "evidencia": {
+    "archivo_json": "output/e3/experimento_1_red.json",
+    "trazas_jaeger": "http://localhost:16686 (spans SQL Q1 con latencia ~150 ms)",
+    "metricas_prometheus": "e3_query_latency_seconds (salto a bucket 0.15s)"
+  },
+  "aprendizaje": "La latencia de red es acumulativa e impacta directamente cualquier flujo síncrono. El uso de Toxiproxy permite inyectar degradaciones de infraestructura de forma no destructiva y reversible en caliente sin afectar los datos."
+}

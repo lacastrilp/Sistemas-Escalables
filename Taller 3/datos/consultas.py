@@ -23,6 +23,13 @@ import psycopg2.pool
 
 BASE_DIR = Path(__file__).resolve().parent
 SOCK_PATH = BASE_DIR / ".pg_socket"
+TMP_SOCK = Path("/tmp/retail_sock")
+if SOCK_PATH.exists() and any(SOCK_PATH.glob(".s.PGSQL.*")):
+    try:
+        if not TMP_SOCK.exists():
+            TMP_SOCK.symlink_to(SOCK_PATH.resolve())
+    except (FileExistsError, OSError):
+        pass
 
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_PORT = int(os.getenv("DB_PORT", "5435"))
@@ -45,7 +52,10 @@ def _dsn(ruta: str) -> Dict[str, object]:
     base = {"dbname": DB_NAME, "user": DB_USER, "password": DB_PASS, "application_name": f"e3-{ruta}"}
     if ruta == "toxiproxy":
         return {**base, "host": TOXI_HOST, "port": TOXI_PORT, "connect_timeout": 5}
-    if SOCK_PATH.exists() and any(SOCK_PATH.glob(".s.PGSQL.*")):
+    tmp_sock = Path("/tmp/retail_sock")
+    if tmp_sock.exists() and any(tmp_sock.glob(".s.PGSQL.*")):
+        return {**base, "host": str(tmp_sock), "port": 5432}
+    if len(str(SOCK_PATH)) < 100 and SOCK_PATH.exists() and any(SOCK_PATH.glob(".s.PGSQL.*")):
         return {**base, "host": str(SOCK_PATH), "port": 5432}
     return {**base, "host": DB_HOST, "port": DB_PORT, "connect_timeout": 2}
 
@@ -62,7 +72,14 @@ def get_connection(ruta: str = RUTA_DEFECTO):
 
 
 def crear_pool(maxconn: int, ruta: str = RUTA_DEFECTO, minconn: int = 1) -> psycopg2.pool.ThreadedConnectionPool:
-    return psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **_dsn(ruta))
+    try:
+        return psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **_dsn(ruta))
+    except psycopg2.OperationalError:
+        if ruta == "directa":
+            dsn = {"dbname": DB_NAME, "user": DB_USER, "password": DB_PASS,
+                   "host": DB_HOST, "port": DB_PORT, "connect_timeout": 2, "application_name": f"e3-{ruta}"}
+            return psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **dsn)
+        raise
 
 
 # ----------------------------------------------------------------------------

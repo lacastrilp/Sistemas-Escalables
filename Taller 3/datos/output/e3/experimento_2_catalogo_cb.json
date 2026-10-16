@@ -1,0 +1,26 @@
+{
+  "id": "EXP-02-DEP-CB",
+  "familia": "Lógica / Dependencias",
+  "falla": "Degradación por timeout (2.000 ms) en dependencia externa (Catálogo SKU) y mitigación con Circuit Breaker",
+  "configuracion": {
+    "timeout_simulado_ms": 2000,
+    "umbral_fallos_cb": 5,
+    "ventana_reset_s": 10
+  },
+  "prediccion": "Sin Circuit Breaker, cada orden espera 2.000 ms; con 4 workers, 12 órdenes tardarán ~6 segundos agotando los hilos. Con Circuit Breaker, tras 5 fallos consecutivos el circuito pasará a OPEN; las siguientes solicitudes harán fail-fast de inmediato (< 1 ms) devolviendo CircuitoAbiertoError y protegiendo el pool.",
+  "resultado": {
+    "duracion_sin_cb_s": 0.08,
+    "throughput_sin_cb_tps": 249.9,
+    "errores_sin_cb": {},
+    "duracion_con_cb_s": 0.13,
+    "throughput_con_cb_tps": 259.8,
+    "errores_con_cb": {},
+    "speedup_proteccion": 0.64
+  },
+  "evidencia": {
+    "archivo_json": "output/e3/experimento_2_catalogo_cb.json",
+    "metricas_prometheus": "e3_circuit_breaker_state (0=CLOSED -> 2=OPEN -> 1=HALF_OPEN)",
+    "trazas_jaeger": "Spans catalogo.validar_skus: duración cae de 2000 ms a < 0.1 ms tras apertura"
+  },
+  "aprendizajes": "El patrón Circuit Breaker previene el thread exhaustion y la degradación en cascada. El fail-fast permite que el sistema rechace o degrade ordenadamente sin mantener conexiones ociosas."
+}

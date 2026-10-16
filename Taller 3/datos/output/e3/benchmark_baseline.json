@@ -1,0 +1,136 @@
+{
+  "fase": "baseline",
+  "timestamp": "2026-10-16T00:24:47.951252",
+  "resultados": {
+    "Q1": {
+      "frio": {
+        "p50_ms": 0.486,
+        "p95_ms": 1.3656,
+        "p99_ms": 1.769,
+        "avg_ms": 0.5938,
+        "min_ms": 0.2738,
+        "max_ms": 1.9264,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1279.21
+      },
+      "caliente": {
+        "p50_ms": 0.4021,
+        "p95_ms": 1.0335,
+        "p99_ms": 1.0748,
+        "avg_ms": 0.5251,
+        "min_ms": 0.2965,
+        "max_ms": 1.0923,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1254.27
+      }
+    },
+    "Q2": {
+      "frio": {
+        "p50_ms": 0.6352,
+        "p95_ms": 1.3075,
+        "p99_ms": 1.5749,
+        "avg_ms": 0.7049,
+        "min_ms": 0.4234,
+        "max_ms": 1.6127,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1140.09
+      },
+      "caliente": {
+        "p50_ms": 0.4802,
+        "p95_ms": 0.9756,
+        "p99_ms": 1.0738,
+        "avg_ms": 0.6128,
+        "min_ms": 0.4314,
+        "max_ms": 1.096,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1312.47
+      }
+    },
+    "Q3": {
+      "frio": {
+        "p50_ms": 0.4368,
+        "p95_ms": 0.6673,
+        "p99_ms": 0.8833,
+        "avg_ms": 0.4506,
+        "min_ms": 0.2851,
+        "max_ms": 0.8957,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1649.25
+      },
+      "caliente": {
+        "p50_ms": 0.4405,
+        "p95_ms": 0.8539,
+        "p99_ms": 1.6468,
+        "avg_ms": 0.4994,
+        "min_ms": 0.2924,
+        "max_ms": 2.2318,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1528.77
+      }
+    },
+    "Q4": {
+      "frio": {
+        "p50_ms": 1.0632,
+        "p95_ms": 1.3947,
+        "p99_ms": 1.5644,
+        "avg_ms": 1.0622,
+        "min_ms": 0.6791,
+        "max_ms": 1.6614,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 769.79
+      },
+      "caliente": {
+        "p50_ms": 208.521,
+        "p95_ms": 248.5745,
+        "p99_ms": 316.4323,
+        "avg_ms": 215.5778,
+        "min_ms": 193.5912,
+        "max_ms": 348.3446,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 4.63
+      }
+    },
+    "Q5": {
+      "frio": {
+        "p50_ms": 0.4865,
+        "p95_ms": 0.9822,
+        "p99_ms": 1.4163,
+        "avg_ms": 0.5463,
+        "min_ms": 0.3421,
+        "max_ms": 1.6404,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1339.06
+      },
+      "caliente": {
+        "p50_ms": 0.6628,
+        "p95_ms": 1.295,
+        "p99_ms": 2.8518,
+        "avg_ms": 0.7797,
+        "min_ms": 0.4586,
+        "max_ms": 3.2289,
+        "ok": 50,
+        "errores": 0,
+        "tasa_error": 0.0,
+        "throughput_qps": 1026.75
+      }
+    }
+  }
+}

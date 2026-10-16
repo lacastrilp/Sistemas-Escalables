@@ -102,5 +102,7 @@ networks:
 
 volumes:
   postgres_data:
+    external: true
+    name: sistemas-escalables_postgres_data
   prometheus_data:
   grafana_data:

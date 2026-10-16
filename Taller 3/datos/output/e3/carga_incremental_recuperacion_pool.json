@@ -1,0 +1,21 @@
+{
+  "fase": "recuperacion_pool",
+  "timestamp": "2026-10-16T00:39:51.235073",
+  "intentos": 20,
+  "workers": 4,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 20
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 5.025,
+  "tx_p95_ms": 16.541,
+  "tx_p99_ms": 20.607,
+  "duracion_s": 0.04,
+  "throughput_tps": 468.3
+}

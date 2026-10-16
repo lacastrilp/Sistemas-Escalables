@@ -1,0 +1,5 @@
+consulta,escenario,optimizacion,p50_e2_ms,meta_e3_max_ms,p50_logrado_ms,mejora_porcentaje,cumple_meta_10
+Q1,frio,Caché LRU en memoria,0.081,0.0729,0.0018,97.78,True
+Q1,caliente,Caché LRU en memoria,0.085,0.0765,0.0015,98.24,True
+Q4,caliente,Read Model Proyectado (resuelve hallazgo incómodo),203.285,182.9565,0.2046,99.9,True
+Q4,frio,Read Model Proyectado,0.692,0.6228,0.1549,77.62,True
