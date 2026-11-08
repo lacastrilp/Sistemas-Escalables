@@ -10,8 +10,8 @@ from pathlib import Path
 import markdown
 
 ROOT_DIR = Path(__file__).resolve().parent
-MD_PATH = ROOT_DIR / "Guia_Sustentacion.md"
-HTML_PATH = ROOT_DIR / "Guia_Sustentacion.html"
+MD_PATH = ROOT_DIR / "Sustentacion.md"
+HTML_PATH = ROOT_DIR / "Sustentacion.html"
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="es">
@@ -166,12 +166,8 @@ def main():
 
     text = MD_PATH.read_text(encoding="utf-8")
     html_body = markdown.markdown(text, extensions=["tables", "fenced_code", "nl2br"])
-    html_body = html_body.replace("<strong>SÍ (97.8%)</strong>", '<span class="badge-success">SÍ (97.8%)</span>')
-    html_body = html_body.replace("<strong>SÍ (98.2%)</strong>", '<span class="badge-success">SÍ (98.2%)</span>')
-    html_body = html_body.replace("<strong>SÍ (98.6%)</strong>", '<span class="badge-success">SÍ (98.6%)</span>')
-    html_body = html_body.replace("<strong>SÍ (99.9%)</strong>", '<span class="badge-success">SÍ (99.9%)</span>')
-    html_body = html_body.replace("<strong>SÍ (77.6%)</strong>", '<span class="badge-success">SÍ (77.6%)</span>')
-    html_body = html_body.replace("<strong>SÍ (99.8%)</strong>", '<span class="badge-success">SÍ (99.8%)</span>')
+    html_body = html_body.replace("<strong>SÍ</strong>", '<span class="badge-success">SÍ</span>')
+    html_body = html_body.replace("<td>SÍ</td>", '<td><span class="badge-success">SÍ</span></td>')
 
     full_html = HTML_TEMPLATE.replace("{content}", html_body)
     HTML_PATH.write_text(full_html, encoding="utf-8")

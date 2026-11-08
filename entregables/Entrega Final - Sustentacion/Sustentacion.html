@@ -134,7 +134,7 @@
 <body>
 <div class="container">
   <main>
-    <h1>Guía de Sustentación - Proyecto Integrador</h1>
+    <h1>Sustentación - Proyecto Integrador</h1>
 <h2>Portal B2B Retail: Arquitectura, Escalabilidad y Observabilidad</h2>
 <h3>Universidad EAFIT - Aplicaciones y Sistemas Escalables (2026-2)</h3>
 <p><strong>Integrantes:</strong> Sara López Marín y Luis Alejandro Castrillón Pulgarin (Grupo EKS)<br />
@@ -334,7 +334,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 0.0729 ms</td>
 <td style="text-align: center;">0.2620 ms</td>
 <td style="text-align: center;"><strong>0.0018 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (97.8%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Caché LRU en memoria elimina roundtrips a BD.</td>
 </tr>
 <tr>
@@ -345,7 +345,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 0.0765 ms</td>
 <td style="text-align: center;">0.2763 ms</td>
 <td style="text-align: center;"><strong>0.0015 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (98.2%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Resolución en memoria en nanosegundos.</td>
 </tr>
 <tr>
@@ -356,7 +356,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 0.2628 ms</td>
 <td style="text-align: center;">1.3656 ms</td>
 <td style="text-align: center;"><strong>0.0042 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (98.6%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Estabilidad total en la cola de latencia.</td>
 </tr>
 <tr>
@@ -367,7 +367,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 182.95 ms</td>
 <td style="text-align: center;">209.22 ms</td>
 <td style="text-align: center;"><strong>0.2046 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (99.9%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Read model proyectado resuelve el hallazgo incómodo.</td>
 </tr>
 <tr>
@@ -378,7 +378,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 0.6228 ms</td>
 <td style="text-align: center;">0.7446 ms</td>
 <td style="text-align: center;"><strong>0.1549 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (77.6%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Consulta sobre índice de resumen precalculado.</td>
 </tr>
 <tr>
@@ -389,7 +389,7 @@ make t3-status
 <td style="text-align: center;">$\le$ 198.40 ms</td>
 <td style="text-align: center;">248.57 ms</td>
 <td style="text-align: center;"><strong>0.4810 ms</strong></td>
-<td style="text-align: center;"><span class="badge-success">SÍ (99.8%)</span></td>
+<td style="text-align: center;"><span class="badge-success">SÍ</span></td>
 <td style="text-align: left;">Elimina consumo intensivo de CPU en PostgreSQL.</td>
 </tr>
 <tr>
@@ -427,9 +427,6 @@ make t3-status
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p><strong>Nota sobre transparencia técnica:</strong> La rúbrica establece que la transparencia técnica debe ser valorada cuando una métrica no alcanza la meta por condiciones de medición. Explicamos con honestidad que en Q2, Q3 y Q5 la base de datos responde rápido, pero el envoltorio de instrumentación de OpenTelemetry en Python genera una sobrecarga medible de ~0.25 ms.</p>
-</blockquote>
 <hr />
 <h2>6. Comandos Rápidos de Terminal para la Sustentación</h2>
 <pre><code class="language-bash"># 1. Levantar el stack completo (Postgres, Toxiproxy, Jaeger, Prometheus, Grafana)

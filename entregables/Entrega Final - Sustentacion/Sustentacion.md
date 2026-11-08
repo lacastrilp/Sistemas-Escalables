@@ -1,4 +1,4 @@
-# Guía de Sustentación - Proyecto Integrador
+# Sustentación - Proyecto Integrador
 ## Portal B2B Retail: Arquitectura, Escalabilidad y Observabilidad
 ### Universidad EAFIT - Aplicaciones y Sistemas Escalables (2026-2)
 **Integrantes:** Sara López Marín y Luis Alejandro Castrillón Pulgarin (Grupo EKS)  
@@ -139,17 +139,15 @@ Tener abiertas en el navegador las pestañas de Grafana (`http://localhost:3000`
 
 | Consulta | Escenario | Métrica | Valor E2 | Meta E3 (-10%) | E3 Línea Base | E3 Optimizado (Final) | ¿Cumple Meta? | Análisis Técnico |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Q1** | **Frío** | **p50** | 0.081 ms | $\le$ 0.0729 ms | 0.2620 ms | **0.0018 ms** | **SÍ (97.8%)** | Caché LRU en memoria elimina roundtrips a BD. |
-| **Q1** | **Caliente** | **p50** | 0.085 ms | $\le$ 0.0765 ms | 0.2763 ms | **0.0015 ms** | **SÍ (98.2%)** | Resolución en memoria en nanosegundos. |
-| **Q1** | **Frío** | **p95** | 0.292 ms | $\le$ 0.2628 ms | 1.3656 ms | **0.0042 ms** | **SÍ (98.6%)** | Estabilidad total en la cola de latencia. |
-| **Q4** | **Caliente** | **p50** | 203.28 ms | $\le$ 182.95 ms | 209.22 ms | **0.2046 ms** | **SÍ (99.9%)** | Read model proyectado resuelve el hallazgo incómodo. |
-| **Q4** | **Frío** | **p50** | 0.692 ms | $\le$ 0.6228 ms | 0.7446 ms | **0.1549 ms** | **SÍ (77.6%)** | Consulta sobre índice de resumen precalculado. |
-| **Q4** | **Caliente** | **p95** | 220.45 ms | $\le$ 198.40 ms | 248.57 ms | **0.4810 ms** | **SÍ (99.8%)** | Elimina consumo intensivo de CPU en PostgreSQL. |
+| **Q1** | **Frío** | **p50** | 0.081 ms | $\le$ 0.0729 ms | 0.2620 ms | **0.0018 ms** | **SÍ** | Caché LRU en memoria elimina roundtrips a BD. |
+| **Q1** | **Caliente** | **p50** | 0.085 ms | $\le$ 0.0765 ms | 0.2763 ms | **0.0015 ms** | **SÍ** | Resolución en memoria en nanosegundos. |
+| **Q1** | **Frío** | **p95** | 0.292 ms | $\le$ 0.2628 ms | 1.3656 ms | **0.0042 ms** | **SÍ** | Estabilidad total en la cola de latencia. |
+| **Q4** | **Caliente** | **p50** | 203.28 ms | $\le$ 182.95 ms | 209.22 ms | **0.2046 ms** | **SÍ** | Read model proyectado resuelve el hallazgo incómodo. |
+| **Q4** | **Frío** | **p50** | 0.692 ms | $\le$ 0.6228 ms | 0.7446 ms | **0.1549 ms** | **SÍ** | Consulta sobre índice de resumen precalculado. |
+| **Q4** | **Caliente** | **p95** | 220.45 ms | $\le$ 198.40 ms | 248.57 ms | **0.4810 ms** | **SÍ** | Elimina consumo intensivo de CPU en PostgreSQL. |
 | **Q2** | **Frío** | **p50** | 0.150 ms | $\le$ 0.1350 ms | 0.4098 ms | 0.4098 ms | *No aplica* | Consulta sin caché: la sobrecarga del SDK de Jaeger suma ~0.25 ms. |
 | **Q3** | **Caliente** | **p50** | 0.066 ms | $\le$ 0.0594 ms | 0.3033 ms | 0.3033 ms | *No aplica* | Refleja el overhead fijo de spans en operaciones ultra-cortas. |
 | **Q5** | **Caliente** | **p50** | 0.390 ms | $\le$ 0.3510 ms | 0.4262 ms | 0.4262 ms | *No aplica* | En producción se soluciona con muestreo de trazas (sampling). |
-
-> **Nota sobre transparencia técnica:** La rúbrica establece que la transparencia técnica debe ser valorada cuando una métrica no alcanza la meta por condiciones de medición. Explicamos con honestidad que en Q2, Q3 y Q5 la base de datos responde rápido, pero el envoltorio de instrumentación de OpenTelemetry en Python genera una sobrecarga medible de ~0.25 ms.
 
 ---
 
