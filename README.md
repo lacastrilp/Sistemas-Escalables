@@ -33,11 +33,16 @@ Sistemas-Escalables/
 │   │   ├── Entregable2_Informe_Escalabilidad_de_Datos.html # Informe técnico interactivo
 │   │   ├── Entregable2_Informe_Escalabilidad_de_Datos.md   # Informe técnico en Markdown
 │   │   └── Guia_Defensa_Entregable2.md             # Guía para la sustentación
-│   └── Entrega 3 - Caos y Observabilidad/
-│       ├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.html # Informe técnico oficial
-│       ├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.md   # Informe técnico en Markdown
-│       ├── Rubrica_Entregable_3_EAFIT_v2_Linea_Base.docx              # Rúbrica de evaluación
-│       └── Entregable 3 - Sept28.pdf                                  # Guía del enunciado
+│   ├── Entrega 3 - Caos y Observabilidad/
+│   │   ├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.html # Informe técnico oficial
+│   │   ├── Entregable3_Informe_Laboratorio_Fallas_Observabilidad.md   # Informe técnico en Markdown
+│   │   ├── Rubrica_Entregable_3_EAFIT_v2_Linea_Base.docx              # Rúbrica de evaluación
+│   │   └── Entregable 3 - Sept28.pdf                                  # Guía del enunciado
+│   └── Entrega Final - Sustentacion/
+│       ├── Guia_Sustentacion.html                                     # Guía de sustentación en HTML
+│       ├── Guia_Sustentacion.md                                       # Guía técnica para la defensa
+│       ├── script_presentacion_15min.md                               # Guión minuto a minuto (15 mins)
+│       └── prompt_para_generar_diapositivas_ia.md                     # Prompt para generar diapositivas
 │
 ├── Taller 1/                                        # Fundamentos de BD, Índices y Replicación
 │   ├── 01-standalone/                               # PostgreSQL, generación y benchmark de índices
@@ -75,6 +80,7 @@ Sistemas-Escalables/
 | **Entrega 1** | PDF | [`entregables/Entrega 1 - Diseno/`](entregables/Entrega%201%20-%20Diseno/Portal_B2B_Retail_Documento_Diseno.pdf) | Arquitectura de dominio, especificación OpenAPI, diagramas C4 y modelo relacional. |
 | **Entrega 2** | HTML / MD | [`entregables/Entrega 2 - Escalabilidad de Datos/`](entregables/Entrega%202%20-%20Escalabilidad%20de%20Datos/Entregable2_Informe_Escalabilidad_de_Datos.html) | Población de 5.66M registros, modelos físicos desacoplados, benchmarking Q1 a Q5 y planes `EXPLAIN`. |
 | **Entrega 3** | HTML / MD | [`entregables/Entrega 3 - Caos y Observabilidad/`](entregables/Entrega%203%20-%20Caos%20y%20Observabilidad/Entregable3_Informe_Laboratorio_Fallas_Observabilidad.html) | Laboratorio de caos, inyección Toxiproxy/OTel, Circuit Breakers, mitigaciones y validación de mejora $\ge 10\%$. |
+| **Sustentación Final** | HTML / MD | [`entregables/Entrega Final - Sustentacion/`](entregables/Entrega%20Final%20-%20Sustentacion/Guia_Sustentacion.html) | **Sustentación del Proyecto Integrador:** Guía de defensa, guión de 15 minutos, demostración en vivo, análisis crítico y comparativa E2 vs E3. |
 
 ---
 

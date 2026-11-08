@@ -37,6 +37,10 @@ help:
 
 db-up:
 	@echo "==> [db-up] Iniciando servicio PostgreSQL con Docker Compose..."
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "    ERROR: Docker daemon no responde. Si usas Linux con Docker Engine, prueba: docker context use default"; \
+		exit 1; \
+	fi
 	@docker compose up -d postgres
 	@echo "==> [db-up] Esperando a que PostgreSQL pase el healthcheck..."
 	@for i in {1..30}; do \
@@ -108,3 +112,4 @@ clean-test:
 clean:
 	@echo "==> [clean] Deteniendo contenedores y eliminando volumen..."
 	@docker compose down -v
+	@rm -rf datos/.pg_socket 2>/dev/null || true

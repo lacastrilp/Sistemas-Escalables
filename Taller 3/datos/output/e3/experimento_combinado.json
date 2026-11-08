@@ -1,0 +1,35 @@
+{
+  "id": "EXP-05-COMBINADO",
+  "familias": [
+    "Red / Infraestructura",
+    "Concurrencia / Recursos",
+    "Estado / Concurrencia de Datos"
+  ],
+  "falla": "Falla Combinada en Cascada: Latencia inducida (150 ms) + Inanición parcial de Pool (2 zombies en pool de 5) + Bloqueo transaccional sobre Proveedor Caliente",
+  "configuracion": {
+    "latencia_red_ms": 150,
+    "jitter_ms": 10,
+    "pool_max": 5,
+    "zombies": 2,
+    "timeout_adquisicion_s": 0.5,
+    "bloqueadores_hot": 1,
+    "lock_timeout_ms": 300
+  },
+  "prediccion": "La latencia de red (150 ms) amplifica el tiempo en que las conexiones son retenidas, saturando instantáneamente el pool reducido (solo 3 conexiones útiles). Al mismo tiempo, la transacción sobre el proveedor caliente mantiene los bloqueos por más tiempo, causando una cascada de abortos por lock_timeout (300 ms) y rechazos de conexión (PoolAgotadoError).",
+  "resultado": {
+    "intentos_bajo_falla": 20,
+    "errores_bajo_falla": 11,
+    "tasa_error_falla": 0.55,
+    "reintentos_absorbidos": 4,
+    "duracion_falla_s": 4.82,
+    "tiempo_killswitch_s": 0.38,
+    "errores_recuperacion": 0,
+    "tasa_error_recuperada": 0.0
+  },
+  "evidencia": {
+    "archivo_json": "output/e3/experimento_combinado.json",
+    "metricas_prometheus": "e3_query_latency_seconds (spikes a 0.15s), e3_query_errors_total{tipo='PoolAgotadoError'}, e3_fault_events_total{familia='estado_datos'}",
+    "trazas_jaeger": "Spans mostrando acumulación simultánea de adquisición de pool + latencia downstream Toxiproxy + eventos de lock timeout"
+  },
+  "aprendizaje": "Las fallas en sistemas distribuidos se potencian entre sí: una lentitud de red convierte la contención local en una inanición sistémica de hilos y conexiones. Aislamiento estricto de pools (bulkheading), timeouts acotados y un Kill Switch de reacción sub-segundo son imprescindibles para evitar una caída total en cascada."
+}

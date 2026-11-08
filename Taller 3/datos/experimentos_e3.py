@@ -422,6 +422,102 @@ def ejecutar_experimento_4_locks() -> Dict[str, Any]:
 
 
 # ============================================================================
+# 5. EXPERIMENTO COMBINADO (Rúbrica Criterios 1 y 2): Red + Recursos + Locks
+# ============================================================================
+def ejecutar_experimento_fallas_combinadas(iteraciones: int = 20) -> Dict[str, Any]:
+    log.info("=== EXPERIMENTO COMBINADO: RED (Toxiproxy 150ms) + RECURSOS (Zombies) + LOCKS (Hot Provider) ===")
+    motor = MotorFallas().start()
+    try:
+        # Activar falla combinada multivariable
+        log.info("Inyectando combinación: Red (150ms) + 2 Zombies en Pool (max=5) + Bloqueador en Proveedor Hot...")
+        escribir_config({
+            "fallas_activas": True,
+            "red": {
+                "enabled": True,
+                "tipo": "latency",
+                "latencia_ms": 150,
+                "jitter_ms": 10,
+                "direccion": "downstream"
+            },
+            "pool_conexiones": {
+                "enabled": True,
+                "pool_max": 5,
+                "zombies": 2,
+                "zombie_sleep_s": 10,
+                "timeout_adquisicion_s": 0.5
+            },
+            "estado_datos": {
+                "enabled": True,
+                "probabilidad_error_transitorio": 0.25,
+                "bloqueadores_concurrentes": 1,
+                "lock_sleep_s": 3,
+                "lock_timeout_app_ms": 300
+            }
+        })
+        time.sleep(2.5)
+
+        # Ejecución de carga combinada
+        t0 = time.perf_counter()
+        res_combinado = ejecutar_carga(n=iteraciones, workers=6, pool_max=5, commit=False,
+                                       fase="falla_combinada", ruta="toxiproxy")
+        dur_falla = time.perf_counter() - t0
+
+        # Kill Switch Maestro
+        t0_kill = time.perf_counter()
+        kill_switch()
+        t_kill = time.perf_counter() - t0_kill
+        time.sleep(2.0)
+
+        # Medición post-killswitch en estado limpio
+        res_recov = ejecutar_carga(n=iteraciones, workers=4, pool_max=5, commit=False,
+                                   fase="recuperacion_combinada", ruta="directa")
+
+    finally:
+        motor.stop()
+
+    exp_data = {
+        "id": "EXP-05-COMBINADO",
+        "familias": [
+            "Red / Infraestructura",
+            "Concurrencia / Recursos",
+            "Estado / Concurrencia de Datos"
+        ],
+        "falla": "Falla Combinada en Cascada: Latencia inducida (150 ms) + Inanición parcial de Pool (2 zombies en pool de 5) + Bloqueo transaccional sobre Proveedor Caliente",
+        "configuracion": {
+            "latencia_red_ms": 150,
+            "jitter_ms": 10,
+            "pool_max": 5,
+            "zombies": 2,
+            "timeout_adquisicion_s": 0.5,
+            "bloqueadores_hot": 1,
+            "lock_timeout_ms": 300
+        },
+        "prediccion": "La latencia de red (150 ms) amplifica el tiempo en que las conexiones son retenidas, saturando instantáneamente el pool reducido (solo 3 conexiones útiles). Al mismo tiempo, la transacción sobre el proveedor caliente mantiene los bloqueos por más tiempo, causando una cascada de abortos por lock_timeout (300 ms) y rechazos de conexión (PoolAgotadoError).",
+        "resultado": {
+            "intentos_bajo_falla": res_combinado.get("intentos", iteraciones),
+            "errores_bajo_falla": res_combinado.get("errores", 0),
+            "tasa_error_falla": res_combinado.get("tasa_error", 0.0),
+            "reintentos_absorbidos": res_combinado.get("reintentos", 0),
+            "duracion_falla_s": round(dur_falla, 2),
+            "tiempo_killswitch_s": round(t_kill, 2),
+            "errores_recuperacion": res_recov.get("errores", 0),
+            "tasa_error_recuperada": res_recov.get("tasa_error", 0.0)
+        },
+        "evidencia": {
+            "archivo_json": "output/e3/experimento_combinado.json",
+            "metricas_prometheus": "e3_query_latency_seconds (spikes a 0.15s), e3_query_errors_total{tipo='PoolAgotadoError'}, e3_fault_events_total{familia='estado_datos'}",
+            "trazas_jaeger": "Spans mostrando acumulación simultánea de adquisición de pool + latencia downstream Toxiproxy + eventos de lock timeout"
+        },
+        "aprendizaje": "Las fallas en sistemas distribuidos se potencian entre sí: una lentitud de red convierte la contención local en una inanición sistémica de hilos y conexiones. Aislamiento estricto de pools (bulkheading), timeouts acotados y un Kill Switch de reacción sub-segundo son imprescindibles para evitar una caída total en cascada."
+    }
+
+    (E3_DIR / "experimento_combinado.json").write_text(json.dumps(exp_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    log.info("Experimento Combinado completado. Errores bajo falla combinada: %s | Post-killswitch: %s",
+             exp_data["resultado"]["errores_bajo_falla"], exp_data["resultado"]["errores_recuperacion"])
+    return exp_data
+
+
+# ============================================================================
 # 6. DEMOSTRACIÓN DE LA META DEL 10% (Optimizaciones Q1 y Q4)
 # ============================================================================
 def asegurar_read_model_q4(conn) -> None:
@@ -642,11 +738,12 @@ def main():
     ap.add_argument("--exp2", action="store_true", help="Solo Experimento 2 (Catálogo + CB)")
     ap.add_argument("--exp3", action="store_true", help="Solo Experimento 3 (Pool zombies)")
     ap.add_argument("--exp4", action="store_true", help="Solo Experimento 4 (Locks)")
+    ap.add_argument("--combinado", action="store_true", help="Solo Experimento Combinado (Red + Recursos + Locks)")
     ap.add_argument("--mejora", action="store_true", help="Solo Demostración de mejora del 10%%")
     args = ap.parse_args()
 
     # Si no se especifica nada, correr todo por defecto
-    if not any([args.m1, args.exp1, args.exp2, args.exp3, args.exp4, args.mejora]):
+    if not any([args.m1, args.exp1, args.exp2, args.exp3, args.exp4, args.combinado, args.mejora]):
         args.todo = True
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -670,6 +767,9 @@ def main():
 
         if args.todo or args.exp4:
             e4 = ejecutar_experimento_4_locks()
+
+        if args.todo or args.combinado:
+            ejecutar_experimento_fallas_combinadas()
 
         if args.todo or (e1 and e2 and e3 and e4):
             consolidar_tabla_experimentos(e1, e2, e3, e4)

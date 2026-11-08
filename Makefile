@@ -4,11 +4,11 @@
 # Grupo EKS · Sara López Marín & Luis Alejandro Castrillón Pulgarin
 # ============================================================
 
-.PHONY: help all \
+.PHONY: help all clean sustentacion presentacion \
         t1-help t1-standalone-up t1-standalone-down t1-cluster-up t1-cluster-down \
         t2-help t2-up t2-datos t2-verificar t2-benchmark t2-informe t2-down \
-        t3-help t3-up t3-down t3-status t3-killswitch t3-m1 t3-exp1 t3-exp2 t3-exp3 t3-exp4 t3-mejora t3-todo t3-informe \
-        e3-up e3-down e3-status e3-killswitch e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-informe
+        t3-help t3-up t3-down t3-status t3-killswitch t3-m1 t3-exp1 t3-exp2 t3-exp3 t3-exp4 t3-exp-combinado t3-mejora t3-todo t3-informe t3-sustentacion \
+        e3-up e3-down e3-status e3-killswitch e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-exp-combinado e3-mejora e3-todo e3-informe e3-sustentacion
 
 SHELL := /usr/bin/env bash
 .SHELLFLAGS := -euo pipefail -c
@@ -45,10 +45,15 @@ help:
 	@echo "   make t3-exp2            - Experimento 2: Familia Dependencias / Timeout Catálogo y Circuit Breaker"
 	@echo "   make t3-exp3            - Experimento 3: Familia Recursos / Inanición de Pool con Zombies"
 	@echo "   make t3-exp4            - Experimento 4: Familia Datos / Locks FOR UPDATE en Proveedor Caliente"
+	@echo "   make t3-exp-combinado   - Experimento Combinado: Red (150ms) + Recursos (Zombies) + Locks Hot"
 	@echo "   make t3-mejora          - Demostración de Mejora del 10% (Caché LRU Q1 y Read Model Q4)"
 	@echo "   make t3-todo            - Ejecuta la suite experimental completa de E3 de extremo a extremo"
 	@echo "   make t3-informe         - Genera el informe técnico de Entrega 3 en HTML"
 	@echo "   make t3-down            - Detiene contenedores preservando el volumen de 5.66M filas"
+	@echo ""
+	@echo " [SUSTENTACIÓN Y MANTENIMIENTO]"
+	@echo "   make sustentacion       - Compila la Guía de Sustentación Final a HTML"
+	@echo "   make clean              - Detiene contenedores y elimina sockets locales de PostgreSQL"
 	@echo "=========================================================================================="
 
 # -----------------------------------------------------------------------------------------
@@ -126,6 +131,9 @@ t3-exp3:
 t3-exp4:
 	@$(MAKE) -C "Taller 3" e3-exp4
 
+t3-exp-combinado:
+	@$(MAKE) -C "Taller 3" e3-exp-combinado
+
 t3-mejora:
 	@$(MAKE) -C "Taller 3" e3-mejora
 
@@ -134,6 +142,17 @@ t3-todo:
 
 t3-informe:
 	@$(MAKE) -C "Taller 3" e3-informe
+
+# Sustentación & Limpieza Global
+sustentacion presentacion t3-sustentacion e3-sustentacion:
+	@python3 "entregables/Entrega Final - Sustentacion/convertir_html.py"
+
+clean:
+	@echo "==> [clean] Deteniendo contenedores y limpiando sockets locales..."
+	@$(MAKE) -C "Taller 2" clean || true
+	@$(MAKE) -C "Taller 3" clean || true
+	@rm -rf "Taller 2/datos/.pg_socket" "Taller 3/datos/.pg_socket" 2>/dev/null || true
+	@echo "    OK: Todo limpio."
 
 # Backward-compatible e3-* aliases:
 e3-up: t3-up
@@ -145,6 +164,7 @@ e3-exp1: t3-exp1
 e3-exp2: t3-exp2
 e3-exp3: t3-exp3
 e3-exp4: t3-exp4
+e3-exp-combinado: t3-exp-combinado
 e3-mejora: t3-mejora
 e3-todo: t3-todo
 e3-informe: t3-informe

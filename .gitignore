@@ -18,6 +18,7 @@ build/
 
 # Database local sockets & runtimes
 .pg_socket/
+**/.pg_socket/
 *.sock
 *.lock
 *.pid

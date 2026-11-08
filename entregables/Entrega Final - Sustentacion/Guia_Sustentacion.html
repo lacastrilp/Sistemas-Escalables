@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de Sustentación - Portal B2B Retail (100 Puntos)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-light: #eff6ff;
+    --text: #1f2937;
+    --text-muted: #4b5563;
+    --border: #e5e7eb;
+    --bg-light: #f9fafb;
+    --code-bg: #111827;
+    --success-bg: #ecfdf5;
+    --success-text: #065f46;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 2.5rem 1.5rem;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  header {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-size: 1.9rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+  h2 {
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin: 2.2rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 1.15rem;
+    color: #111827;
+    margin: 1.5rem 0 0.6rem;
+    font-weight: 600;
+  }
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0 0 1rem 1.5rem; }
+  li { margin-bottom: 0.35rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.65rem 0.8rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--bg-light);
+    color: #111827;
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+  pre {
+    background: var(--code-bg);
+    color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    margin: 1rem 0 1.5rem;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: #f3f4f6;
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+    color: #111827;
+  }
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  blockquote {
+    border-left: 4px solid var(--primary);
+    background: var(--primary-light);
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  blockquote p { margin: 0; }
+  .badge-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  @media print {
+    body { padding: 0; font-size: 11pt; }
+    h2 { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <main>
+    <h1>Guía de Sustentación - Proyecto Integrador</h1>
+<h2>Portal B2B Retail: Arquitectura, Escalabilidad y Observabilidad</h2>
+<h3>Universidad EAFIT - Aplicaciones y Sistemas Escalables (2026-2)</h3>
+<p><strong>Integrantes:</strong> Sara López Marín y Luis Alejandro Castrillón Pulgarin (Grupo EKS)<br />
+<strong>Evaluación:</strong> Presentación Final (100 Puntos)</p>
+<hr />
+<h2>1. Resumen del Proyecto y Arquitectura</h2>
+<p>El sistema corresponde a un Portal B2B de Retail que gestiona órdenes de compra, catálogos y entregas entre un retail y sus proveedores comerciales.</p>
+<h3>Arquitectura de Base de Datos</h3>
+<ul>
+<li><strong>Monolito modular en PostgreSQL 16:</strong> Implementa 4 esquemas desacoplados:</li>
+<li><code>proveedores</code> (<code>proveedor</code>, <code>contrato_suministro</code>)</li>
+<li><code>catalogo</code> (<code>sku</code>, <code>proveedor_sku</code>)</li>
+<li><code>logistica</code> (<code>cedi</code>, <code>franja_descargue</code>)</li>
+<li><code>ordenes</code> (<code>orden_compra</code>, <code>linea_orden</code>, <code>evento_auditoria</code>)</li>
+<li><strong>Regla estricta de diseño:</strong> Cero <code>JOIN</code>s inter-esquemas. Las dependencias entre dominios solo se guardan como llaves foráneas lógicas (<code>BIGINT</code>).</li>
+<li><strong>Volumen de datos:</strong> 5.66 millones de registros generados sintéticamente con distribución Zipfiana ($s=1.2$) para simular proveedores calientes (superproveedores como Nestlé o Alpina) y una larga cola de proveedores pequeños, además de estacionalidad temporal y casos borde reales.</li>
+</ul>
+<h3>Stack de Infraestructura y Observabilidad</h3>
+<ul>
+<li><strong>Base de datos:</strong> PostgreSQL 16 (<code>localhost:5435</code>).</li>
+<li><strong>Inyección de fallas de red:</strong> Toxiproxy (<code>localhost:8474</code> API, <code>localhost:25432</code> proxy a BD).</li>
+<li><strong>Métricas:</strong> Prometheus (<code>localhost:9090</code>) y Grafana (<code>localhost:3000</code>).</li>
+<li><strong>Trazas distribuidas:</strong> Jaeger all-in-one con OpenTelemetry (<code>localhost:16686</code>).</li>
+<li><strong>Motor de caos:</strong> <code>motor_fallas.py</code> con configuración en caliente vía <code>config_fallas.json</code> y Kill Switch maestro.</li>
+</ul>
+<hr />
+<h2>2. Criterio 1: Catálogo de las Ocho Fallas y Efecto en Cascada (25 Puntos)</h2>
+<h3>2.1. Las Ocho Fallas del Sistema (2 por Familia)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Familia</th>
+<th style="text-align: center;">ID</th>
+<th style="text-align: left;">Falla</th>
+<th style="text-align: left;">Mecanismo</th>
+<th style="text-align: left;">Efecto en la Aplicación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Red / Infraestructura</strong></td>
+<td style="text-align: center;"><strong>F1.1</strong></td>
+<td style="text-align: left;">Latencia de red</td>
+<td style="text-align: left;">Toxic downstream de 150 ms ± 10 ms jitter en Toxiproxy</td>
+<td style="text-align: left;">Aumenta el tiempo de roundtrip en cada consulta SQL.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"><strong>F1.2</strong></td>
+<td style="text-align: left;">Ancho de banda limitado</td>
+<td style="text-align: left;">Toxic bandwidth a 64 kbps en Toxiproxy</td>
+<td style="text-align: left;">Congestiona transferencias de lotes de líneas de orden.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Lógica / Dependencias</strong></td>
+<td style="text-align: center;"><strong>F2.1</strong></td>
+<td style="text-align: left;">Timeout en Catálogo</td>
+<td style="text-align: left;">Bloqueo síncrono simulado de 2.000 ms en validación de SKUs</td>
+<td style="text-align: left;">Inanición de hilos en la API de órdenes de compra.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"><strong>F2.2</strong></td>
+<td style="text-align: left;">Circuito Abierto</td>
+<td style="text-align: left;">Conmutación de Circuit Breaker a estado OPEN tras 5 fallos</td>
+<td style="text-align: left;">Fail-fast inmediato (&lt; 1 ms) devolviendo <code>CircuitoAbiertoError</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Concurrencia / Recursos</strong></td>
+<td style="text-align: center;"><strong>F3.1</strong></td>
+<td style="text-align: left;">Conexiones Zombie</td>
+<td style="text-align: left;">Hilos concurrentes reteniendo conexiones con <code>pg_sleep(15)</code></td>
+<td style="text-align: left;">Ocupa 4 de las 5 conexiones del pool disponible.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"><strong>F3.2</strong></td>
+<td style="text-align: left;">Agotamiento de Pool</td>
+<td style="text-align: left;">Timeout de adquisición de 500 ms en el connection pool</td>
+<td style="text-align: left;">Solicitudes que no obtienen conexión fallan con <code>PoolAgotadoError</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Estado / Datos</strong></td>
+<td style="text-align: center;"><strong>F4.1</strong></td>
+<td style="text-align: left;">Lock Pesimista Hot</td>
+<td style="text-align: left;"><code>SELECT FOR UPDATE</code> concurrente en Proveedor 1</td>
+<td style="text-align: left;">Bloquea la fila del superproveedor impidiendo validaciones.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"><strong>F4.2</strong></td>
+<td style="text-align: left;">Aborto por lock_timeout</td>
+<td style="text-align: left;">Configuración de <code>SET LOCAL lock_timeout = '300ms'</code></td>
+<td style="text-align: left;">Cancela la transacción si el bloqueo supera los 300 ms (código <code>55P03</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3>2.2. Combinación de Fallas y Propagación en Cascada (EXP-05-COMBINADO)</h3>
+<p>Para la sustentación en vivo, se ejecuta una combinación de tres familias al tiempo:<br />
+1. <strong>Red:</strong> Latencia de 150 ms en Toxiproxy (<code>F1.1</code>).<br />
+2. <strong>Recursos:</strong> 2 conexiones zombie ocupando un pool de 5 (<code>F3.1</code>).<br />
+3. <strong>Datos:</strong> Lock pesimista en Proveedor 1 (<code>F4.1</code>).</p>
+<p><strong>¿Cómo se propaga la falla en cascada?</strong><br />
+- En condiciones normales, una consulta a base de datos toma menos de 1 ms. Al inyectar 150 ms de latencia de red, cada worker retiene su conexión en el pool durante cientos de milisegundos.<br />
+- Como 2 conexiones del pool están secuestradas por hilos zombie, solo quedan 3 conexiones útiles.<br />
+- Cuando llegan múltiples órdenes concurrentes, la cola de espera del pool se llena de inmediato y supera el timeout de adquisición (0.5 s), provocando una oleada de excepciones <code>PoolAgotadoError</code> (tasa de error del 55%).<br />
+- Al mismo tiempo, las órdenes que sí logran conexión e intentan validar al Proveedor 1 chocan contra el lock pesimista. Debido a que el viaje de red ya consumió 150 ms, el límite de <code>lock_timeout = 300ms</code> se agota casi de inmediato, abortando las transacciones.<br />
+- <strong>Conclusión:</strong> Una lentitud de red a nivel de infraestructura multiplicó la contención de datos y colapsó los recursos de la aplicación.</p>
+<h3>2.3. Señales de Observabilidad Correlacionadas</h3>
+<ul>
+<li><strong>Prometheus:</strong> Subida del histograma <code>e3_query_latency_seconds</code> al bucket de 0.15s y salto vertical en <code>e3_query_errors_total{tipo="PoolAgotadoError"}</code>.</li>
+<li><strong>Jaeger:</strong> Trazas con spans <code>adquirir_conexion_pool</code> superando los 500 ms con tag <code>error=true</code> y spans SQL con duración de ~152 ms.</li>
+<li><strong>Logs:</strong> Mensajes estructurados indicando la aplicación del toxic, la captura de <code>PoolAgotadoError</code> y el disparo del Kill Switch.</li>
+</ul>
+<hr />
+<h2>3. Criterio 2: Reproducción de Fallas en Vivo y Estado Inicial (25 Puntos)</h2>
+<h3>3.1. Preparación del Entorno</h3>
+<p>Antes de iniciar la exposición, tener los contenedores activos:</p>
+<pre><code class="language-bash">make t3-up
+make t3-status
+</code></pre>
+<p>Tener abiertas en el navegador las pestañas de Grafana (<code>http://localhost:3000</code>) y Jaeger (<code>http://localhost:16686</code>).</p>
+<h3>3.2. Paso a Paso de la Demostración</h3>
+<ol>
+<li><strong>Estado Inicial (Línea Base Sin Fallas):</strong><br />
+<code>bash
+   make t3-m1</code></li>
+<li>Mostrar en terminal y en Grafana que las consultas Q1 a Q5 corren en sub-milisegundos y con 0% de errores.</li>
+<li><strong>Inyección de la Falla Combinada en Vivo:</strong><br />
+<code>bash
+   make t3-exp-combinado</code></li>
+<li>Mostrar en la terminal cómo la tasa de error sube al 55% por saturación del pool y cómo las órdenes absorben reintentos.</li>
+<li><strong>Diagnóstico con Observabilidad:</strong></li>
+<li>En Jaeger, abrir la traza más reciente del servicio <code>portal-b2b-lab-e3</code> y mostrar la acumulación de tiempo entre el pool y la red.</li>
+<li>En Grafana, mostrar la gráfica de errores y el salto en latencia.</li>
+<li><strong>Reversión con el Kill Switch:</strong><br />
+<code>bash
+   make t3-killswitch</code></li>
+<li>Mostrar que el comando apaga el toxic de Toxiproxy y cancela los zombies en <strong>0.38 segundos</strong>.</li>
+<li>Mostrar en la salida que la medición limpia posterior vuelve a <strong>0% de error</strong> y latencia normal, manteniendo los <strong>5.66M registros intactos</strong> (las pruebas usan transacciones con <code>ROLLBACK</code>).</li>
+</ol>
+<hr />
+<h2>4. Criterio 3: Análisis de Resultados y Aprendizajes (20 Puntos)</h2>
+<h3>4.1. Contraste de Hipótesis vs. Mediciones</h3>
+<ul>
+<li><strong>Red (Toxiproxy):</strong> Hipótesis de subida a ~150 ms confirmada (resultado medido: 152.57 ms en p50). Reversión confirmada en 0.35 s.</li>
+<li><strong>Dependencias (Catálogo + CB):</strong> Hipótesis de fail-fast confirmada. Sin Circuit Breaker el lote tardó 6.12 s; con Circuit Breaker bajó a 0.08 s (<strong>aceleración de 76.5x</strong>).</li>
+<li><strong>Recursos (Pool Zombies):</strong> Hipótesis confirmada. La inanición causó 63.3% de rechazos controlados por timeout de 0.5 s.</li>
+<li><strong>Datos (Locks Hot):</strong> Hipótesis confirmada. Se absorbieron 7 reintentos con backoff exponencial y jitter sin colapsar el sistema.</li>
+</ul>
+<h3>4.2. Decisiones Técnicas que NO Repetiríamos y Lecciones de Diseño</h3>
+<ol>
+<li><strong>No instrumentar trazas al 100% en microconsultas de base de datos:</strong></li>
+<li>En queries muy rápidas (como Q1 o Q3 que tardan 0.08 ms en Postgres), la sobrecarga de crear spans en Python y propagar contexto añade ~0.25 ms. Es decir, la telemetría costaba más que la propia consulta.</li>
+<li><em>Qué haríamos en producción:</em> Configurar muestreo de trazas (<em>trace sampling</em>) al 1% o 5% en operaciones normales y solo muestrear al 100% cuando haya errores o latencias altas.</li>
+<li><strong>No usar acoplamiento síncrono entre órdenes y catálogo:</strong></li>
+<li>En el diseño inicial, la validación de SKUs se hacía llamando directamente al servicio de catálogo en la misma petición HTTP. Cuando el catálogo tuvo un retardo de 2 s, todos los hilos de la aplicación se bloquearon.</li>
+<li><em>Qué haríamos en producción:</em> Usar comunicación asíncrona mediante eventos (ej. Kafka o RabbitMQ) o una copia local en caché de solo lectura con CQRS.</li>
+<li><strong>No depender del timeout por defecto de PostgreSQL:</strong></li>
+<li>Por defecto <code>lock_timeout</code> es 0 (espera infinita). Si una transacción bloquea un registro caliente, cuelga a todas las demás.</li>
+<li><em>Qué haríamos en producción:</em> Establecer siempre <code>SET LOCAL lock_timeout = '300ms'</code> acompañado de reintentos exponenciales con jitter.</li>
+</ol>
+<hr />
+<h2>5. Criterio 4: Correcciones Finales y Comparativa E2 vs E3 (30 Puntos)</h2>
+<h3>5.1. Justificación de las Optimizaciones Implementadas</h3>
+<ol>
+<li><strong>Caché LRU en memoria para Consulta Q1 (Contrato Vigente):</strong></li>
+<li>Se implementó una caché L1 en Python con política LRU y expiración TTL para evitar consultar repetidamente <code>proveedores.contrato_suministro</code>.</li>
+<li>La latencia p50 pasó de <strong>0.081 ms a 0.0018 ms</strong> (reducción del <strong>97.8%</strong> en frío y <strong>98.2%</strong> en caliente).</li>
+<li><strong>Read Model Proyectado para Consulta Q4 (OTIF y Logística):</strong></li>
+<li>En el Entregable 2, Q4 era el «hallazgo incómodo» porque tardaba <strong>203.28 ms</strong> al agregar millones de líneas de orden en caliente.</li>
+<li>Se creó una tabla proyectada (<code>ordenes.resumen_otif_mensual</code>) que mantiene los cálculos preagregados por mes y proveedor.</li>
+<li>La latencia p50 bajó de <strong>203.28 ms a 0.2046 ms</strong>, logrando una mejora del <strong>99.9%</strong> (más de 990 veces más rápida).</li>
+</ol>
+<hr />
+<h3>5.2. Tabla Oficial de Comparación E2 vs. E3</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Consulta</th>
+<th style="text-align: center;">Escenario</th>
+<th style="text-align: center;">Métrica</th>
+<th style="text-align: center;">Valor E2</th>
+<th style="text-align: center;">Meta E3 (-10%)</th>
+<th style="text-align: center;">E3 Línea Base</th>
+<th style="text-align: center;">E3 Optimizado (Final)</th>
+<th style="text-align: center;">¿Cumple Meta?</th>
+<th style="text-align: left;">Análisis Técnico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>Q1</strong></td>
+<td style="text-align: center;"><strong>Frío</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.081 ms</td>
+<td style="text-align: center;">$\le$ 0.0729 ms</td>
+<td style="text-align: center;">0.2620 ms</td>
+<td style="text-align: center;"><strong>0.0018 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (97.8%)</span></td>
+<td style="text-align: left;">Caché LRU en memoria elimina roundtrips a BD.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q1</strong></td>
+<td style="text-align: center;"><strong>Caliente</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.085 ms</td>
+<td style="text-align: center;">$\le$ 0.0765 ms</td>
+<td style="text-align: center;">0.2763 ms</td>
+<td style="text-align: center;"><strong>0.0015 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (98.2%)</span></td>
+<td style="text-align: left;">Resolución en memoria en nanosegundos.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q1</strong></td>
+<td style="text-align: center;"><strong>Frío</strong></td>
+<td style="text-align: center;"><strong>p95</strong></td>
+<td style="text-align: center;">0.292 ms</td>
+<td style="text-align: center;">$\le$ 0.2628 ms</td>
+<td style="text-align: center;">1.3656 ms</td>
+<td style="text-align: center;"><strong>0.0042 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (98.6%)</span></td>
+<td style="text-align: left;">Estabilidad total en la cola de latencia.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q4</strong></td>
+<td style="text-align: center;"><strong>Caliente</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">203.28 ms</td>
+<td style="text-align: center;">$\le$ 182.95 ms</td>
+<td style="text-align: center;">209.22 ms</td>
+<td style="text-align: center;"><strong>0.2046 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (99.9%)</span></td>
+<td style="text-align: left;">Read model proyectado resuelve el hallazgo incómodo.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q4</strong></td>
+<td style="text-align: center;"><strong>Frío</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.692 ms</td>
+<td style="text-align: center;">$\le$ 0.6228 ms</td>
+<td style="text-align: center;">0.7446 ms</td>
+<td style="text-align: center;"><strong>0.1549 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (77.6%)</span></td>
+<td style="text-align: left;">Consulta sobre índice de resumen precalculado.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q4</strong></td>
+<td style="text-align: center;"><strong>Caliente</strong></td>
+<td style="text-align: center;"><strong>p95</strong></td>
+<td style="text-align: center;">220.45 ms</td>
+<td style="text-align: center;">$\le$ 198.40 ms</td>
+<td style="text-align: center;">248.57 ms</td>
+<td style="text-align: center;"><strong>0.4810 ms</strong></td>
+<td style="text-align: center;"><span class="badge-success">SÍ (99.8%)</span></td>
+<td style="text-align: left;">Elimina consumo intensivo de CPU en PostgreSQL.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q2</strong></td>
+<td style="text-align: center;"><strong>Frío</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.150 ms</td>
+<td style="text-align: center;">$\le$ 0.1350 ms</td>
+<td style="text-align: center;">0.4098 ms</td>
+<td style="text-align: center;">0.4098 ms</td>
+<td style="text-align: center;"><em>No aplica</em></td>
+<td style="text-align: left;">Consulta sin caché: la sobrecarga del SDK de Jaeger suma ~0.25 ms.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q3</strong></td>
+<td style="text-align: center;"><strong>Caliente</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.066 ms</td>
+<td style="text-align: center;">$\le$ 0.0594 ms</td>
+<td style="text-align: center;">0.3033 ms</td>
+<td style="text-align: center;">0.3033 ms</td>
+<td style="text-align: center;"><em>No aplica</em></td>
+<td style="text-align: left;">Refleja el overhead fijo de spans en operaciones ultra-cortas.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Q5</strong></td>
+<td style="text-align: center;"><strong>Caliente</strong></td>
+<td style="text-align: center;"><strong>p50</strong></td>
+<td style="text-align: center;">0.390 ms</td>
+<td style="text-align: center;">$\le$ 0.3510 ms</td>
+<td style="text-align: center;">0.4262 ms</td>
+<td style="text-align: center;">0.4262 ms</td>
+<td style="text-align: center;"><em>No aplica</em></td>
+<td style="text-align: left;">En producción se soluciona con muestreo de trazas (sampling).</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota sobre transparencia técnica:</strong> La rúbrica establece que la transparencia técnica debe ser valorada cuando una métrica no alcanza la meta por condiciones de medición. Explicamos con honestidad que en Q2, Q3 y Q5 la base de datos responde rápido, pero el envoltorio de instrumentación de OpenTelemetry en Python genera una sobrecarga medible de ~0.25 ms.</p>
+</blockquote>
+<hr />
+<h2>6. Comandos Rápidos de Terminal para la Sustentación</h2>
+<pre><code class="language-bash"># 1. Levantar el stack completo (Postgres, Toxiproxy, Jaeger, Prometheus, Grafana)
+make t3-up
+
+# 2. Verificar estado de contenedores
+make t3-status
+
+# 3. Fase 1: Línea base y estado inicial
+make t3-m1
+
+# 4. Fase 2: Ejecutar falla combinada en vivo (Red + Pool + Locks)
+make t3-exp-combinado
+
+# 5. Fase 3: Kill switch (apagar fallas en &lt; 1 segundo)
+make t3-killswitch
+
+# 6. Fase 4: Demostración de mejoras cuantitativas E2 vs E3 (Q1 y Q4)
+make t3-mejora
+</code></pre>
+  </main>
+  <footer>
+    Universidad EAFIT · Aplicaciones y Sistemas Escalables (2026-2) · Sara López Marín & Luis Alejandro Castrillón Pulgarin
+  </footer>
+</div>
+</body>
+</html>

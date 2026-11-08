@@ -3,7 +3,7 @@
 # Universidad EAFIT · Aplicaciones y Sistemas Escalables
 # ============================================================
 
-.PHONY: all db-up db-reset generar determinismo cargar verificar benchmark-carga carga-incremental benchmark-queries graficas benchmark datos clean clean-test help e3-up e3-down e3-status e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-mejora e3-todo e3-killswitch e3-informe
+.PHONY: all db-up db-reset generar determinismo cargar verificar benchmark-carga carga-incremental benchmark-queries graficas benchmark datos clean clean-test help e3-up e3-down e3-status e3-m1 e3-exp1 e3-exp2 e3-exp3 e3-exp4 e3-exp-combinado e3-mejora e3-todo e3-killswitch e3-informe
 
 PYTHON ?= $(shell which python3)
 SHELL  := /usr/bin/env bash
@@ -28,6 +28,7 @@ help:
 	@echo "  make e3-exp2            - Experimento 2: Familia Dependencias / Timeout Catálogo y Circuit Breaker"
 	@echo "  make e3-exp3            - Experimento 3: Familia Recursos / Inanición de Pool con Zombies"
 	@echo "  make e3-exp4            - Experimento 4: Familia Datos / Locks FOR UPDATE en Proveedor Caliente"
+	@echo "  make e3-exp-combinado   - Experimento Combinado: Red (150ms) + Recursos (Zombies) + Locks Hot"
 	@echo "  make e3-mejora          - Demostración de Mejora del 10% (Caché LRU Q1 y Read Model Q4)"
 	@echo "  make e3-todo            - Ejecuta la suite experimental completa de E3 de extremo a extremo"
 	@echo "  make e3-informe         - Genera el informe técnico de Entrega 3 en HTML"
@@ -46,6 +47,10 @@ help:
 
 db-up:
 	@echo "==> [db-up] Iniciando servicio PostgreSQL con Docker Compose..."
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "    ERROR: Docker daemon no responde. Si usas Linux con Docker Engine, prueba: docker context use default"; \
+		exit 1; \
+	fi
 	@docker compose up -d postgres
 	@echo "==> [db-up] Esperando a que PostgreSQL pase el healthcheck..."
 	@for i in {1..30}; do \
@@ -106,6 +111,7 @@ datos: db-up db-reset generar determinismo cargar verificar benchmark graficas
 clean:
 	@echo "==> Deteniendo y eliminando contenedor y volumen de desarrollo..."
 	@docker compose down -v
+	@rm -rf datos/.pg_socket 2>/dev/null || true
 	@echo "    OK: Entorno limpio."
 
 clean-test:
@@ -137,6 +143,10 @@ clean-test:
 
 e3-up:
 	@echo "==> [e3-up] Iniciando stack completo de observabilidad y fallas..."
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "    ERROR: Docker daemon no responde. Si usas Linux con Docker Engine, prueba: docker context use default"; \
+		exit 1; \
+	fi
 	@docker compose up -d
 	@echo "==> [e3-up] Esperando healthcheck de PostgreSQL..."
 	@for i in {1..30}; do \
@@ -182,6 +192,10 @@ e3-exp3: e3-up
 e3-exp4: e3-up
 	@echo "==> [e3-exp4] Ejecutando Experimento 4: Familia Datos (Locks en Proveedor Caliente)..."
 	@$(PYTHON) datos/experimentos_e3.py --exp4
+
+e3-exp-combinado: e3-up
+	@echo "==> [e3-exp-combinado] Ejecutando Experimento Combinado (Red + Recursos + Locks)..."
+	@$(PYTHON) datos/experimentos_e3.py --combinado
 
 e3-mejora: e3-up
 	@echo "==> [e3-mejora] Ejecutando Demostración de Mejora del 10% (Caché LRU y Read Model)..."
