@@ -1,0 +1,23 @@
+{
+  "fase": "falla_combinada",
+  "timestamp": "2026-11-09T14:21:29.304511",
+  "intentos": 20,
+  "workers": 6,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "toxiproxy",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 9
+  },
+  "errores": {
+    "PoolAgotadoError": 11
+  },
+  "reintentos": 0,
+  "tasa_error": 0.55,
+  "tx_p50_ms": 630.418,
+  "tx_p95_ms": 1286.544,
+  "tx_p99_ms": 1752.79,
+  "duracion_s": 3.75,
+  "throughput_tps": 5.3
+}

@@ -1,6 +1,6 @@
 {
   "fase": "baseline",
-  "timestamp": "2026-10-16T00:39:16.645419",
+  "timestamp": "2026-11-09T14:20:36.194325",
   "intentos": 200,
   "workers": 4,
   "pool_max": 10,
@@ -13,9 +13,9 @@
   "errores": {},
   "reintentos": 0,
   "tasa_error": 0.0,
-  "tx_p50_ms": 6.038,
-  "tx_p95_ms": 16.643,
-  "tx_p99_ms": 29.12,
-  "duracion_s": 0.38,
-  "throughput_tps": 526.1
+  "tx_p50_ms": 14.942,
+  "tx_p95_ms": 31.361,
+  "tx_p99_ms": 34.16,
+  "duracion_s": 0.9,
+  "throughput_tps": 222.8
 }

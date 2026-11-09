@@ -1,6 +1,6 @@
 {
   "fase": "recuperacion_pool",
-  "timestamp": "2026-10-16T00:39:51.235073",
+  "timestamp": "2026-11-09T14:21:13.408561",
   "intentos": 20,
   "workers": 4,
   "pool_max": 5,
@@ -13,9 +13,9 @@
   "errores": {},
   "reintentos": 0,
   "tasa_error": 0.0,
-  "tx_p50_ms": 5.025,
-  "tx_p95_ms": 16.541,
-  "tx_p99_ms": 20.607,
-  "duracion_s": 0.04,
-  "throughput_tps": 468.3
+  "tx_p50_ms": 15.089,
+  "tx_p95_ms": 28.137,
+  "tx_p99_ms": 29.376,
+  "duracion_s": 0.09,
+  "throughput_tps": 222.2
 }

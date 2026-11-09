@@ -5,7 +5,7 @@
     "falla": "Latencia inducida en capa de red (150 ms ± 10 ms jitter)",
     "configuracion": "latencia=150ms, jitter=10ms (Toxiproxy port 25432)",
     "prediccion": "Latencia p50 Q1 sube de 0.3ms a ~150-165ms; reversión en < 2s con kill switch",
-    "resultado": "p50 con falla=152.57ms | p50 recuperado=0.71ms",
+    "resultado": "p50 con falla=150.09ms | p50 recuperado=0.58ms",
     "evidencia": "Trazas Jaeger (spans SQL 150ms) + histograma Prometheus en bucket 0.15s",
     "aprendizaje": "La latencia de red es acumulativa; Toxiproxy permite aislar el impacto de red de forma reversible."
   },
@@ -15,7 +15,7 @@
     "falla": "Degradación por timeout (2.000 ms) en dependencia externa (Catálogo SKU) y mitigación con Circuit Breaker",
     "configuracion": "timeout=2000ms, umbral_cb=5, reset_ventana=10s",
     "prediccion": "Sin CB: cada orden tarda 2s agotando hilos; Con CB: tras 5 fallos, abre a OPEN y hace fail-fast (< 1ms)",
-    "resultado": "Duración sin CB=0.08s | Duración con CB=0.13s (Speedup: 0.64x)",
+    "resultado": "Duración sin CB=1.28s | Duración con CB=1.29s (Speedup: 1.0x)",
     "evidencia": "Métrica e3_circuit_breaker_state (0->2->1) + Spans Jaeger con tag fail-fast",
     "aprendizaje": "Circuit Breaker corta el thread exhaustion y permite degradación controlada."
   },

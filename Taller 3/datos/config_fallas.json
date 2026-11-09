@@ -23,15 +23,15 @@
   "pool_conexiones": {
     "enabled": true,
     "pool_max": 5,
-    "zombies": 4,
-    "zombie_sleep_s": 15,
+    "zombies": 2,
+    "zombie_sleep_s": 10,
     "timeout_adquisicion_s": 0.5
   },
   "estado_datos": {
     "enabled": true,
-    "probabilidad_error_transitorio": 0.2,
-    "bloqueadores_concurrentes": 2,
-    "lock_sleep_s": 4,
+    "probabilidad_error_transitorio": 0.25,
+    "bloqueadores_concurrentes": 1,
+    "lock_sleep_s": 3,
     "lock_timeout_app_ms": 300
   }
 }

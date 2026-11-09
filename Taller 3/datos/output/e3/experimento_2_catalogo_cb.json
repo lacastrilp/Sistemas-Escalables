@@ -9,13 +9,13 @@
   },
   "prediccion": "Sin Circuit Breaker, cada orden espera 2.000 ms; con 4 workers, 12 órdenes tardarán ~6 segundos agotando los hilos. Con Circuit Breaker, tras 5 fallos consecutivos el circuito pasará a OPEN; las siguientes solicitudes harán fail-fast de inmediato (< 1 ms) devolviendo CircuitoAbiertoError y protegiendo el pool.",
   "resultado": {
-    "duracion_sin_cb_s": 0.08,
-    "throughput_sin_cb_tps": 249.9,
+    "duracion_sin_cb_s": 1.28,
+    "throughput_sin_cb_tps": 342.7,
     "errores_sin_cb": {},
-    "duracion_con_cb_s": 0.13,
-    "throughput_con_cb_tps": 259.8,
+    "duracion_con_cb_s": 1.29,
+    "throughput_con_cb_tps": 528.6,
     "errores_con_cb": {},
-    "speedup_proteccion": 0.64
+    "speedup_proteccion": 1.0
   },
   "evidencia": {
     "archivo_json": "output/e3/experimento_2_catalogo_cb.json",

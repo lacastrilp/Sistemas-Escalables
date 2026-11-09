@@ -18,12 +18,14 @@
   "prediccion": "La latencia de red (150 ms) amplifica el tiempo en que las conexiones son retenidas, saturando instantáneamente el pool reducido (solo 3 conexiones útiles). Al mismo tiempo, la transacción sobre el proveedor caliente mantiene los bloqueos por más tiempo, causando una cascada de abortos por lock_timeout (300 ms) y rechazos de conexión (PoolAgotadoError).",
   "resultado": {
     "intentos_bajo_falla": 20,
-    "errores_bajo_falla": 11,
+    "errores_bajo_falla": {
+      "PoolAgotadoError": 11
+    },
     "tasa_error_falla": 0.55,
-    "reintentos_absorbidos": 4,
-    "duracion_falla_s": 4.82,
-    "tiempo_killswitch_s": 0.38,
-    "errores_recuperacion": 0,
+    "reintentos_absorbidos": 0,
+    "duracion_falla_s": 7.6,
+    "tiempo_killswitch_s": 0.0,
+    "errores_recuperacion": {},
     "tasa_error_recuperada": 0.0
   },
   "evidencia": {

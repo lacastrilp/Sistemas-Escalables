@@ -1,6 +1,6 @@
 {
   "fase": "mitigacion_catalogo_con_cb",
-  "timestamp": "2026-10-16T00:39:43.637405",
+  "timestamp": "2026-11-09T14:21:05.495969",
   "intentos": 25,
   "workers": 4,
   "pool_max": 5,
@@ -13,9 +13,9 @@
   "errores": {},
   "reintentos": 0,
   "tasa_error": 0.0,
-  "tx_p50_ms": 15.997,
-  "tx_p95_ms": 22.781,
-  "tx_p99_ms": 26.208,
-  "duracion_s": 0.1,
-  "throughput_tps": 259.8
+  "tx_p50_ms": 0.737,
+  "tx_p95_ms": 30.223,
+  "tx_p99_ms": 40.265,
+  "duracion_s": 0.05,
+  "throughput_tps": 528.6
 }

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-16T00:39:57.225010",
+  "timestamp": "2026-11-09T14:21:31.720293",
   "iteraciones": 100,
   "optimizaciones": [
     {
@@ -8,8 +8,8 @@
       "optimizacion": "Caché LRU en memoria",
       "p50_e2_ms": 0.081,
       "meta_e3_max_ms": 0.0729,
-      "p50_logrado_ms": 0.0018,
-      "mejora_porcentaje": 97.78,
+      "p50_logrado_ms": 0.0019,
+      "mejora_porcentaje": 97.65,
       "cumple_meta_10": true
     },
     {
@@ -18,8 +18,8 @@
       "optimizacion": "Caché LRU en memoria",
       "p50_e2_ms": 0.085,
       "meta_e3_max_ms": 0.0765,
-      "p50_logrado_ms": 0.0015,
-      "mejora_porcentaje": 98.24,
+      "p50_logrado_ms": 0.002,
+      "mejora_porcentaje": 97.65,
       "cumple_meta_10": true
     },
     {
@@ -28,8 +28,8 @@
       "optimizacion": "Read Model Proyectado (resuelve hallazgo incómodo)",
       "p50_e2_ms": 203.285,
       "meta_e3_max_ms": 182.9565,
-      "p50_logrado_ms": 0.2046,
-      "mejora_porcentaje": 99.9,
+      "p50_logrado_ms": 0.3049,
+      "mejora_porcentaje": 99.85,
       "cumple_meta_10": true
     },
     {
@@ -38,8 +38,8 @@
       "optimizacion": "Read Model Proyectado",
       "p50_e2_ms": 0.692,
       "meta_e3_max_ms": 0.6228,
-      "p50_logrado_ms": 0.1549,
-      "mejora_porcentaje": 77.62,
+      "p50_logrado_ms": 0.1923,
+      "mejora_porcentaje": 72.21,
       "cumple_meta_10": true
     }
   ]

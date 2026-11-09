@@ -14,7 +14,7 @@
     "aceptadas": 0,
     "reintentos_absorbidos": 0,
     "errores": {},
-    "duracion_s": 0.17
+    "duracion_s": 0.19
   },
   "evidencia": {
     "archivo_json": "output/e3/experimento_4_locks.json",

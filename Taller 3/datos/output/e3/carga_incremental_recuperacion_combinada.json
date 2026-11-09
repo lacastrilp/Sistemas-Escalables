@@ -1,0 +1,21 @@
+{
+  "fase": "recuperacion_combinada",
+  "timestamp": "2026-11-09T14:21:31.424823",
+  "intentos": 20,
+  "workers": 4,
+  "pool_max": 5,
+  "commit": false,
+  "ruta": "directa",
+  "aceptadas": 0,
+  "rechazos": {
+    "sin_contrato": 20
+  },
+  "errores": {},
+  "reintentos": 0,
+  "tasa_error": 0.0,
+  "tx_p50_ms": 16.112,
+  "tx_p95_ms": 25.869,
+  "tx_p99_ms": 32.454,
+  "duracion_s": 0.09,
+  "throughput_tps": 218.8
+}
